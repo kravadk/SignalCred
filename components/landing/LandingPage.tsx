@@ -3,18 +3,22 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
+  Activity,
+  AlertTriangle,
   ArrowRight,
   BadgeCheck,
-  BookOpenCheck,
+  CheckCircle2,
   CircleDollarSign,
   DatabaseZap,
   ExternalLink,
   FileCheck2,
-  Gauge,
+  GitBranch,
+  Link2,
   LockKeyhole,
   Megaphone,
   Radio,
   Rocket,
+  ScanLine,
   ShieldCheck,
   Sparkles,
   SquareActivity,
@@ -24,111 +28,127 @@ import {
 import { HeroTrustScene } from "./HeroTrustScene";
 
 const sources = [
-  ["Bags API", "Launch source"],
-  ["Solscan", "Receipts"],
-  ["DexScreener", "Markets"],
-  ["Meteora", "Pools"],
-  ["USDT", "Stable budget"],
-  ["Fee Snapshots", "Velocity"],
+  ["Bags API", "source"],
+  ["Solscan", "receipts"],
+  ["DexScreener", "market"],
+  ["Meteora", "pool"],
+  ["USDT", "stable value"],
+  ["Snapshots", "fee velocity"],
 ] as const;
 
-const proofNodes = ["Bags API", "Creator Proof", "Fee Loop", "Claim Receipt", "Social Proof", "USDT Campaign"] as const;
+const particles = ["BAGS", "SOLSCAN", "USDT", "CLAIM", "POOL", "CREATOR", "FEES", "SOCIAL", "8zAe...BAGS", "proof://mint"];
 
-const pillars = [
-  {
-    title: "Bags-native Launch",
-    body: "Launch through Bags, then create the token trust profile, proof links, and first creator update from one flow.",
-    href: "/launch",
-    icon: Rocket,
-    tone: "from-[#ff5c7a] to-[#ff9d55]",
-  },
-  {
-    title: "Trust Index",
-    body: "Every indexed Bags token gets source labels, market state, risk tags, and transparent explorer links.",
-    href: "/token",
-    icon: ShieldCheck,
-    tone: "from-[#31d99b] to-[#4ec7ff]",
-  },
-  {
-    title: "Fee Loop Evidence",
-    body: "Show generated fees, claims, receipts, and USDT campaign funding proof without inventing missing data.",
-    href: "/fees",
-    icon: CircleDollarSign,
-    tone: "from-[#ffbf4d] to-[#ff6a7a]",
-  },
-  {
-    title: "Token Social Proof",
-    body: "Official updates, milestones, campaigns, and community posts stay attached to a verified Bags token.",
-    href: "/square",
-    icon: SquareActivity,
-    tone: "from-[#a78bfa] to-[#55d6ff]",
-  },
+const proofNodes = [
+  ["Bags", "source verified"],
+  ["Pool", "Meteora linked"],
+  ["Creator", "admin matched"],
+  ["Fees", "lifetime indexed"],
+  ["Claims", "receipt-ready"],
+  ["Social", "token-linked"],
+  ["USDT", "campaign proof"],
 ] as const;
 
-const previews = {
-  Launch: {
-    eyebrow: "Bags-native creation",
-    title: "One launch flow, immediate trust profile.",
-    body: "Create through Bags, confirm the mint, attach explorer proof, and publish the official first post.",
-    bullets: ["Bags SDK/API path", "Partner key server-side", "Creator-verified post"],
-    icon: Rocket,
-    color: "#ff5c7a",
+const terminalRows = [
+  ["source", "Bags feed verified", "ok"],
+  ["creator", "admin wallet matched", "ok"],
+  ["fee loop", "24h baseline warming", "warm"],
+  ["risk", "no critical flags", "ok"],
+  ["passport", "shareable proof page ready", "ok"],
+] as const;
+
+const beforeRows = [
+  ["Creator", "unknown wallet", AlertTriangle],
+  ["Fees", "no claim evidence", AlertTriangle],
+  ["Social", "generic hype", AlertTriangle],
+  ["Links", "scattered explorers", AlertTriangle],
+] as const;
+
+const afterRows = [
+  ["Creator", "Bags admin proof", CheckCircle2],
+  ["Fees", "fee loop evidence", CheckCircle2],
+  ["Social", "token-linked proof", CheckCircle2],
+  ["Links", "passport + explorers", CheckCircle2],
+] as const;
+
+const pipeline = [
+  ["01", "Launch detected", "New Bags mint enters the trust stream.", Rocket],
+  ["02", "Bags source verified", "Launch source and mint evidence attach to the profile.", BadgeCheck],
+  ["03", "Pool + market linked", "DEX, pool, liquidity, and explorer links become inspectable.", Link2],
+  ["04", "Fee loop indexed", "Lifetime fees, 24h baseline, claims, and receipts are tracked.", CircleDollarSign],
+  ["05", "Social proof attached", "Official updates, campaigns, milestones, and posts stay token-linked.", Megaphone],
+  ["06", "USDT proof ready", "Creator economics become stable, explainable, and campaign-ready.", WalletCards],
+] as const;
+
+const demos = {
+  "Scan Token": {
+    title: "Scanner turns a mint into a proof map.",
+    accent: "#31d99b",
+    rows: [
+      ["mint", "8zAe...BAGS"],
+      ["source", "Bags launch feed"],
+      ["pool", "Meteora pair linked"],
+      ["market", "DexScreener attached"],
+      ["result", "passport ready"],
+    ],
   },
-  Trust: {
-    eyebrow: "Before users trade",
-    title: "A token page that answers whether it is real.",
-    body: "Source badges, creator proof, pool proof, market links, and Evidence 2.0 sit next to the buy panel.",
-    bullets: ["Bags feed proof", "Solscan mint link", "Dex/Meteora labels"],
-    icon: BadgeCheck,
-    color: "#31d99b",
+  Passport: {
+    title: "A shareable page for every Bags token.",
+    accent: "#55d6ff",
+    rows: [
+      ["score", "74 / 100"],
+      ["proof", "4 / 4 verified"],
+      ["risk", "1 review"],
+      ["explorers", "Bags + Solscan + DEX"],
+      ["embed", "public trust widget"],
+    ],
   },
-  Fees: {
-    eyebrow: "Creator economy",
-    title: "Fees become reputation, not hidden backend noise.",
-    body: "Lifetime fees, fee velocity, claim events, receipts, and USDT values explain the creator economy clearly.",
-    bullets: ["Hourly snapshots", "Claim receipts", "Stable USDT estimates"],
-    icon: TrendingUp,
-    color: "#ffb84d",
+  "Creator Graph": {
+    title: "Creator history becomes visible.",
+    accent: "#a78bfa",
+    rows: [
+      ["creator", "wallet reliability"],
+      ["tokens", "known launch graph"],
+      ["fees", "total generated"],
+      ["claims", "receipt timeline"],
+      ["patterns", "risk labels"],
+    ],
   },
-  Social: {
-    eyebrow: "Token-linked community",
-    title: "Social activity only counts when it has token context.",
-    body: "Square ranks official posts, campaigns, milestones, and proof-backed activity instead of generic engagement.",
-    bullets: ["Token Social Proof", "USDT campaigns", "Milestone timeline"],
-    icon: Megaphone,
-    color: "#8b5cf6",
+  "Fee Loop": {
+    title: "Generated fees become evidence.",
+    accent: "#ffcf7a",
+    rows: [
+      ["lifetime", "indexed from Bags"],
+      ["24h", "snapshot baseline"],
+      ["claim", "Solscan receipt"],
+      ["campaign", "USDT funding proof"],
+      ["policy", "no fake amounts"],
+    ],
+  },
+  "Social Proof": {
+    title: "Square becomes token validation.",
+    accent: "#ff5c7a",
+    rows: [
+      ["official", "creator-signed update"],
+      ["community", "token-linked posts"],
+      ["milestones", "proof timeline"],
+      ["spam", "penalized in score"],
+      ["ranking", "proof-ranked feed"],
+    ],
   },
 } as const;
 
-const steps = [
-  ["01", "Launch through Bags", "A creator starts with a Bags-native launch path instead of a detached token page.", Rocket],
-  ["02", "Token page created", "The mint gets identity, market state, Bags proof, and explorer links immediately.", BadgeCheck],
-  ["03", "Official post published", "The creator/admin wallet signs the first token-linked Square update.", Megaphone],
-  ["04", "Reputation compounds", "Fees, claims, campaigns, milestones, and social proof build the profile over time.", Gauge],
-] as const;
-
 const tracks = [
-  ["Bags API", "Full token index, proof rows, evidence links, launch confirmation, and ReStream-ready status.", DatabaseZap],
-  ["Fee Sharing", "Fee velocity, creator reputation, claim timeline, receipts, and stable USDT equivalents.", FileCheck2],
-  ["Social Finance", "Official updates, proof-ranked Square, milestones, campaigns, and anti-spam token context.", Radio],
-  ["Tether / USDT", "USDT buy mode, creator economics in stable value, treasury planner, and funding proof.", WalletCards],
+  ["Bags API", "index, launch source, evidence links", DatabaseZap],
+  ["Fee Sharing", "velocity, claims, creator reputation", FileCheck2],
+  ["Social Finance", "proof-ranked token timelines", Radio],
+  ["Tether / USDT", "stable creator economics", WalletCards],
 ] as const;
 
-const signalRows = [
-  ["source", "Bags feed verified", "ok"],
-  ["creator", "admin wallet matched", "ok"],
-  ["fees", "24h baseline warming", "warming"],
-  ["receipt", "Solscan link ready", "ok"],
-  ["campaign", "USDT budget planned", "preview"],
-] as const;
-
-type PreviewKey = keyof typeof previews;
+type DemoKey = keyof typeof demos;
 
 export function LandingPage() {
-  const [activePreview, setActivePreview] = useState<PreviewKey>("Trust");
-  const preview = previews[activePreview];
-  const PreviewIcon = preview.icon;
-
+  const [activeDemo, setActiveDemo] = useState<DemoKey>("Scan Token");
+  const demo = demos[activeDemo];
   const marqueeItems = useMemo(() => [...sources, ...sources], []);
 
   return (
@@ -138,96 +158,129 @@ export function LandingPage() {
       <section className="relative isolate min-h-[calc(100svh-64px)] overflow-hidden border-b border-white/10 bg-[#080912]">
         <HeroTrustScene />
         <div className="absolute inset-0 pointer-events-none landing-aurora" />
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.36]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)",
-            backgroundSize: "42px 42px",
-            maskImage: "linear-gradient(to bottom, black 0%, black 68%, transparent 100%)",
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none landing-scan-grid opacity-55" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#07070c] to-transparent" />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {particles.map((item, index) => (
+            <span
+              key={`${item}-${index}`}
+              className="landing-proof-particle font-mono text-xs font-black uppercase tracking-[0.18em] text-white/18"
+              style={{
+                left: `${7 + (index * 9) % 86}%`,
+                animationDelay: `${index * 0.82}s`,
+                animationDuration: `${7 + (index % 5)}s`,
+              }}
+            >
+              {item}
+            </span>
+          ))}
+        </div>
 
-        <div className="relative z-10 mx-auto grid min-h-[calc(100svh-64px)] max-w-[1480px] items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.94fr_1.06fr] lg:px-10">
-          <div className="landing-rise max-w-5xl">
+        <div className="relative z-10 mx-auto grid min-h-[calc(100svh-64px)] max-w-[1520px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
+          <div className="landing-rise max-w-4xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#31d99b]/35 bg-[#0d1c19]/82 px-4 py-2 text-sm font-black text-[#69f0bd] shadow-[0_14px_50px_rgba(49,217,155,0.18)] backdrop-blur-xl">
-              <Sparkles size={16} />
-              SignalCred Trust Observatory
+              <ScanLine size={16} />
+              Trust Passport Scanner
             </div>
-            <h1 className="max-w-5xl font-display text-5xl leading-[0.92] tracking-normal text-white sm:text-7xl lg:text-8xl">
-              Launch Bags tokens people can actually trust
+            <h1 className="max-w-4xl font-display text-6xl leading-[0.88] tracking-normal text-white sm:text-7xl lg:text-8xl">
+              Trust before the trade
             </h1>
-            <p className="mt-7 max-w-3xl text-lg font-black leading-8 text-white/66 sm:text-xl">
-              Create a Bags-native token, publish verified creator updates, prove fees and claims, and turn community activity into token reputation.
+            <p className="mt-7 max-w-2xl text-lg font-black leading-8 text-white/66 sm:text-xl">
+              SignalCred turns every Bags token into a verifiable trust passport with source proof, fee evidence, creator reputation, and token-linked social validation.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/launch"
                 className="group landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ff4f6d,#ff8b45)] px-6 text-base font-black text-white shadow-[0_22px_54px_rgba(255,79,109,0.28)] transition hover:translate-y-[-2px] hover:shadow-[0_28px_72px_rgba(255,92,122,0.36)]"
               >
-                Launch Token
+                Launch verified token
                 <ArrowRight size={18} className="transition group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/token"
                 className="landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-6 text-base font-black text-white shadow-[0_16px_44px_rgba(49,217,155,0.12)] backdrop-blur-xl transition hover:border-[#31d99b]/50 hover:bg-white/[0.12]"
               >
-                Explore Trust Index
+                Open Trust Index
               </Link>
               <Link
                 href="/hackathon/status"
                 className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-6 text-base font-black text-white/58 backdrop-blur-xl transition hover:text-white"
               >
-                View Hackathon Status
+                View Grant Status
               </Link>
             </div>
-
-            <div className="mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
-              {proofNodes.map((node, index) => (
-                <div
-                  key={node}
-                  className="landing-proof-chip rounded-2xl border border-white/10 bg-white/[0.07] px-3 py-3 text-sm font-black text-white/82 shadow-[0_16px_38px_rgba(0,0,0,0.22)] backdrop-blur-xl"
-                  style={{ animationDelay: `${index * 80}ms` }}
-                >
-                  <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#31d99b] shadow-[0_0_14px_rgba(49,217,155,0.9)]" />
-                  {node}
+            <div className="mt-8 grid max-w-2xl grid-cols-3 gap-3">
+              {["No fake data", "Explorer-linked", "Token social only"].map((item) => (
+                <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.055] px-3 py-3 text-sm font-black text-white/72 backdrop-blur-xl">
+                  <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#31d99b]" />
+                  {item}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="relative hidden min-h-[600px] lg:block">
-            <div className="landing-float-panel absolute right-4 top-12 w-80 rounded-[28px] border border-white/10 bg-[#101524]/78 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
+          <div className="relative min-h-[640px]">
+            <div className="landing-scanner-shell absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#31d99b]/20 bg-[#31d99b]/[0.025] shadow-[0_0_140px_rgba(49,217,155,0.16)]">
+              <div className="landing-scanner-orbit landing-orbit-a" />
+              <div className="landing-scanner-orbit landing-orbit-b" />
+              <div className="landing-scan-beam" />
+              {proofNodes.map(([label, detail], index) => (
+                <div key={label} className={`landing-orbit-node landing-node-${index}`}>
+                  <span className="text-sm font-black text-white">{label}</span>
+                  <span className="mt-0.5 block text-[10px] font-black uppercase tracking-[0.12em] text-white/38">{detail}</span>
+                </div>
+              ))}
+              <div className="absolute left-1/2 top-1/2 w-[310px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[30px] border border-white/14 bg-[#101524]/88 p-5 shadow-[0_38px_120px_rgba(0,0,0,0.46)] backdrop-blur-2xl">
+                <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,#31d99b,transparent)]" />
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-[#31d99b]/14 px-3 py-1 text-xs font-black text-[#69f0bd]">SCANNING</span>
+                  <span className="font-mono text-xs text-white/38">8zAe...BAGS</span>
+                </div>
+                <div className="mt-5 rounded-2xl border border-white/10 bg-[#07070c] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#ff5c7a,#ffb84d)] text-xl font-black">S</div>
+                    <div>
+                      <p className="font-display text-2xl leading-none">Signal Mint</p>
+                      <p className="mt-1 font-mono text-xs text-white/40">$SIGNAL / SOL</p>
+                    </div>
+                  </div>
+                  <div className="mt-5 space-y-2">
+                    {["Bags source", "Creator proof", "Fee loop", "Social proof"].map((item, index) => (
+                      <div key={item} className="flex items-center justify-between rounded-xl bg-white/[0.055] px-3 py-2">
+                        <span className="text-xs font-black text-white/58">{item}</span>
+                        <span className={index === 2 ? "text-xs font-black text-[#ffcf7a]" : "text-xs font-black text-[#69f0bd]"}>
+                          {index === 2 ? "warming" : "verified"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="landing-float-panel absolute right-0 top-8 hidden w-80 rounded-[28px] border border-white/10 bg-[#101524]/78 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl xl:block">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Live proof rail</p>
-                <span className="rounded-full bg-[#31d99b]/14 px-3 py-1 text-xs font-black text-[#69f0bd]">no fake data</span>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Live terminal</p>
+                <span className="rounded-full bg-[#31d99b]/14 px-3 py-1 text-xs font-black text-[#69f0bd]">proof</span>
               </div>
               <div className="mt-5 space-y-3">
-                {signalRows.map(([label, value, status]) => (
+                {terminalRows.map(([label, value, status]) => (
                   <div key={label} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
                       <p className="mt-1 text-sm font-black text-white">{value}</p>
                     </div>
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-black ${
-                        status === "ok"
-                          ? "bg-[#31d99b]/14 text-[#69f0bd]"
-                          : status === "warming"
-                            ? "bg-[#ffb84d]/18 text-[#ffcf7a]"
-                            : "bg-[#8b5cf6]/16 text-[#c4b5fd]"
-                      }`}
-                    >
+                    <span className={status === "ok" ? "rounded-full bg-[#31d99b]/14 px-2.5 py-1 text-xs font-black text-[#69f0bd]" : "rounded-full bg-[#ffb84d]/18 px-2.5 py-1 text-xs font-black text-[#ffcf7a]"}>
                       {status}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="landing-float-panel landing-float-delay absolute bottom-16 left-4 w-72 rounded-[28px] border border-white/10 bg-[#0b0a12]/86 p-5 text-white shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-              <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Fee loop</p>
-              <p className="mt-3 text-3xl font-black">Generated to claimed to proof</p>
+
+            <div className="landing-float-panel landing-float-delay absolute bottom-6 left-0 hidden w-72 rounded-[28px] border border-white/10 bg-[#0b0a12]/86 p-5 text-white shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-xl xl:block">
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Passport receipt</p>
+              <p className="mt-3 text-3xl font-black">source to fee to social</p>
               <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full w-4/5 rounded-full bg-[linear-gradient(90deg,#31d99b,#ffb84d,#ff5c7a)] landing-progress" />
               </div>
@@ -253,123 +306,141 @@ export function LandingPage() {
       <section className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
         <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#69f0bd]">Product system</p>
+            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#69f0bd]">Before / After</p>
             <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">
-              A launchpad is not enough. Trust has to ship with the token.
+              The market does not need more hype. It needs inspectable proof.
             </h2>
           </div>
           <p className="max-w-3xl text-lg font-black leading-8 text-white/60">
-            The first screen should feel alive because the product is alive: source checks, token proof, fee snapshots, creator identity, and social context all move together.
+            SignalCred makes the difference visible: a token moves from scattered, unverifiable signals into one public passport traders and creators can share.
           </p>
         </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {pillars.map(({ title, body, href, icon: Icon, tone }, index) => (
-            <Link
-              href={href}
-              key={title}
-              className="landing-tilt-card group relative min-h-80 overflow-hidden rounded-[30px] border border-white/10 bg-[#101524]/68 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-2 hover:border-white/18"
-              style={{ animationDelay: `${index * 90}ms` }}
-            >
-              <div className={`absolute inset-x-0 top-0 h-2 bg-gradient-to-r ${tone}`} />
-              <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${tone} text-white shadow-[0_18px_36px_rgba(19,33,58,0.16)]`}>
-                <Icon size={24} />
+        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+          <div className="landing-tilt-card rounded-[32px] border border-[#ff5c7a]/18 bg-[#1a0c14]/78 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.24)]">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="text-[#ff8ba0]" />
+              <div>
+                <p className="font-display text-3xl">Before SignalCred</p>
+                <p className="text-sm font-black text-white/42">One token, too many unknowns.</p>
               </div>
-              <h3 className="mt-9 text-2xl font-black text-white">{title}</h3>
-              <p className="mt-4 text-base font-black leading-7 text-white/56">{body}</p>
-              <div className="absolute bottom-6 left-6 inline-flex items-center gap-2 text-sm font-black text-white/80">
-                Open layer <ArrowRight size={16} className="transition group-hover:translate-x-1" />
+            </div>
+            <div className="mt-6 space-y-3">
+              {beforeRows.map(([label, value, Icon]) => (
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.045] px-4 py-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
+                    <p className="mt-1 text-base font-black text-white/70">{value}</p>
+                  </div>
+                  <Icon className="text-[#ff8ba0]" size={20} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="landing-tilt-card rounded-[32px] border border-[#31d99b]/22 bg-[#071b16]/78 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.24)]">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="text-[#69f0bd]" />
+              <div>
+                <p className="font-display text-3xl">After SignalCred</p>
+                <p className="text-sm font-black text-white/42">A passport users can verify.</p>
               </div>
-            </Link>
-          ))}
+            </div>
+            <div className="mt-6 space-y-3">
+              {afterRows.map(([label, value, Icon]) => (
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.045] px-4 py-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
+                    <p className="mt-1 text-base font-black text-white">{value}</p>
+                  </div>
+                  <Icon className="text-[#69f0bd]" size={20} />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="relative overflow-hidden border-y border-white/10 bg-[#101524] text-white">
         <div className="absolute inset-0 landing-dark-grid opacity-60" />
-        <div className="mx-auto grid max-w-[1480px] gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:px-10">
-          <div className="relative z-10">
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#ffcf68]">Interactive preview</p>
-            <h2 className="mt-4 font-display text-4xl leading-tight sm:text-6xl">
-              The demo path judges can understand in one minute.
-            </h2>
-            <p className="mt-5 max-w-2xl text-lg font-black leading-8 text-white/64">
-              Launch, verify, prove, and grow. The product stays focused on token trust instead of becoming another broad crypto terminal.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-2">
-              {(Object.keys(previews) as PreviewKey[]).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActivePreview(key)}
-                  className={`min-h-11 rounded-2xl border px-5 text-sm font-black transition ${
-                    activePreview === key
-                      ? "border-white/35 bg-white text-[#101524]"
-                      : "border-white/14 bg-white/[0.05] text-white/62 hover:text-white"
-                  }`}
-                >
-                  {key}
-                </button>
-              ))}
+        <div className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
+          <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+            <div className="max-w-4xl">
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#ffcf68]">Proof pipeline</p>
+              <h2 className="mt-4 font-display text-4xl leading-tight sm:text-6xl">
+                Every trust signal has a source, a status, and a next proof step.
+              </h2>
             </div>
+            <Link href="/passport/8zAeGH7GbT7Pvig3n1tWTgmTi5XqYzeWHVUwfKfiBAGS" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-5 text-sm font-black text-white shadow-[0_14px_34px_rgba(0,0,0,0.2)] hover:bg-white hover:text-[#101524]">
+              View sample passport <ExternalLink size={16} />
+            </Link>
           </div>
-          <div className="relative z-10 rounded-[34px] border border-white/12 bg-white/[0.08] p-4 shadow-[0_34px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-            <div className="relative overflow-hidden rounded-[26px] border border-white/12 bg-[#0b0d18] p-6 text-white">
-              <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#ff5c7a,#ffb84d,#31d99b,#55d6ff,#a78bfa)] landing-gradient-run" />
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl text-white shadow-[0_18px_42px_rgba(19,33,58,0.16)]" style={{ background: preview.color }}>
-                    <PreviewIcon size={23} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black uppercase tracking-[0.2em] text-white/36">{preview.eyebrow}</p>
-                    <h3 className="mt-1 text-2xl font-black text-white">{preview.title}</h3>
-                  </div>
+          <div className="landing-pipeline mt-12 grid gap-4 lg:grid-cols-6">
+            {pipeline.map(([num, title, body, Icon], index) => (
+              <div key={title} className="landing-pipeline-step relative min-h-64 rounded-[28px] border border-white/10 bg-white/[0.055] p-5 shadow-[0_20px_58px_rgba(0,0,0,0.2)] backdrop-blur-xl" style={{ animationDelay: `${index * 90}ms` }}>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-black text-white/34">{num}</span>
+                  <Icon size={22} className="text-[#69f0bd]" />
                 </div>
-                <Gauge className="hidden text-[#31d99b] sm:block" />
+                <h3 className="mt-8 text-xl font-black text-white">{title}</h3>
+                <p className="mt-4 text-sm font-black leading-6 text-white/54">{body}</p>
               </div>
-              <p className="mt-6 text-lg font-black leading-8 text-white/60">{preview.body}</p>
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {preview.bullets.map((item, index) => (
-                  <div key={item} className="landing-mini-step rounded-2xl border border-white/10 bg-white/[0.06] p-4 shadow-[0_12px_32px_rgba(0,0,0,0.18)]" style={{ animationDelay: `${index * 110}ms` }}>
-                    <BookOpenCheck size={18} className="text-[#31d99b]" />
-                    <p className="mt-3 text-sm font-black leading-5 text-white/82">{item}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-7 rounded-2xl border border-white/10 bg-[#07070c] p-4 text-white">
-                <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.18em] text-white/42">
-                  <span>proof sequence</span>
-                  <span>live UI</span>
-                </div>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full bg-[linear-gradient(90deg,#31d99b,#55d6ff,#a78bfa)] landing-progress" />
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
-        <div className="grid gap-10 lg:grid-cols-[0.68fr_1.32fr]">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#69f0bd]">How it works</p>
-            <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">Trust starts at launch and keeps updating.</h2>
-          </div>
-          <div className="relative grid gap-4 md:grid-cols-2">
-            <div className="pointer-events-none absolute left-4 top-8 hidden h-[calc(100%-4rem)] w-1 rounded-full bg-white/10 md:block">
-              <div className="h-3/4 w-full rounded-full bg-[linear-gradient(#31d99b,#ffb84d,#ff5c7a)] landing-progress-vertical" />
-            </div>
-            {steps.map(([num, title, body, Icon], index) => (
-              <div key={num} className="landing-step-card min-h-56 rounded-[28px] border border-white/10 bg-[#101524]/68 p-6 shadow-[0_18px_52px_rgba(0,0,0,0.22)]" style={{ animationDelay: `${index * 100}ms` }}>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-black text-[#69f0bd]">{num}</p>
-                  <Icon size={22} className="text-[#ff5c7a]" />
-                </div>
-                <h3 className="mt-8 text-2xl font-black text-white">{title}</h3>
-                <p className="mt-4 text-base font-black leading-7 text-white/56">{body}</p>
-              </div>
+      <section className="mx-auto grid max-w-[1480px] gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:px-10">
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.24em] text-[#69f0bd]">Interactive demo</p>
+          <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">
+            Not a feature list. A token investigation cockpit.
+          </h2>
+          <p className="mt-5 max-w-2xl text-lg font-black leading-8 text-white/60">
+            Switch layers to see what SignalCred adds around a Bags token: scanning, passport proof, creator graph, fee loop, and social validation.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-2">
+            {(Object.keys(demos) as DemoKey[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveDemo(key)}
+                className={`min-h-11 rounded-2xl border px-5 text-sm font-black transition ${
+                  activeDemo === key
+                    ? "border-white/35 bg-white text-[#101524]"
+                    : "border-white/14 bg-white/[0.05] text-white/62 hover:text-white"
+                }`}
+              >
+                {key}
+              </button>
             ))}
+          </div>
+        </div>
+        <div className="rounded-[34px] border border-white/12 bg-white/[0.08] p-4 shadow-[0_34px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-[26px] border border-white/12 bg-[#0b0d18] p-6 text-white">
+            <div className="absolute inset-x-0 top-0 h-1 landing-gradient-run" style={{ background: `linear-gradient(90deg, ${demo.accent}, #55d6ff, #ff5c7a)` }} />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-mono text-xs font-black uppercase tracking-[0.22em] text-white/36">{activeDemo}</p>
+                <h3 className="mt-2 font-display text-4xl leading-tight">{demo.title}</h3>
+              </div>
+              <Activity className="shrink-0" style={{ color: demo.accent }} />
+            </div>
+            <div className="mt-8 grid gap-3">
+              {demo.rows.map(([label, value], index) => (
+                <div key={label} className="landing-terminal-line flex items-center justify-between rounded-2xl border border-white/10 bg-[#07070c] px-4 py-4" style={{ animationDelay: `${index * 90}ms` }}>
+                  <span className="font-mono text-xs font-black uppercase tracking-[0.18em] text-white/36">{label}</span>
+                  <span className="text-sm font-black text-white">{value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+              <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.18em] text-white/42">
+                <span>proof sequence</span>
+                <span>capability demo</span>
+              </div>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-[linear-gradient(90deg,#31d99b,#55d6ff,#a78bfa)] landing-progress" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -379,7 +450,9 @@ export function LandingPage() {
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div className="max-w-3xl">
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[#ffcf7a]">Hackathon tracks</p>
-              <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">Built for Bags-native proof, creator reputation, social finance, and USDT value.</h2>
+              <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">
+                One product story, four track angles.
+              </h2>
             </div>
             <Link href="/hackathon" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-5 text-sm font-black text-white shadow-[0_14px_34px_rgba(0,0,0,0.2)] hover:bg-white hover:text-[#101524]">
               Pitch Deck <ArrowRight size={16} />
@@ -398,23 +471,34 @@ export function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
-        <div className="relative overflow-hidden rounded-[38px] border border-white/10 bg-[#101524] p-8 text-white shadow-[0_34px_100px_rgba(0,0,0,0.36)] sm:p-12 lg:p-16">
+        <div className="relative grid gap-8 overflow-hidden rounded-[38px] border border-white/10 bg-[#101524] p-8 text-white shadow-[0_34px_100px_rgba(0,0,0,0.36)] sm:p-12 lg:grid-cols-[1fr_360px] lg:p-16">
           <div className="absolute inset-0 landing-cta-sheen" />
           <div className="relative z-10">
             <LockKeyhole size={32} className="text-[#31d99b]" />
             <h2 className="mt-8 max-w-4xl font-display text-4xl leading-tight sm:text-6xl">
-              Launch the token, then let the proof do the work.
+              Launch the token. Ship the passport with it.
             </h2>
             <p className="mt-5 max-w-3xl text-lg font-black leading-8 text-white/64">
               SignalCred keeps the demo path tight: create through Bags, open the Trust Index, prove the fee loop, and publish token-linked social evidence.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link href="/launch" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-6 text-base font-black text-[#101524] transition hover:bg-[#d7fff0]">
-                Launch Token <ArrowRight size={18} />
+                Launch verified token <ArrowRight size={18} />
               </Link>
-              <Link href="/square" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/18 px-6 text-base font-black text-white/78 transition hover:text-white">
-                Open Token Social Proof <ExternalLink size={16} />
+              <Link href="/token" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/18 px-6 text-base font-black text-white/78 transition hover:text-white">
+                Open Trust Index <ExternalLink size={16} />
               </Link>
+            </div>
+          </div>
+          <div className="relative z-10 rounded-[28px] border border-white/12 bg-[#07070c]/70 p-5">
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">receipt policy</p>
+            <div className="mt-5 space-y-3">
+              {["No fake data", "Explorer-linked", "Token social only", "Preview-only USDT payouts"].map((item) => (
+                <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/[0.055] px-4 py-3">
+                  <CheckCircle2 size={18} className="text-[#69f0bd]" />
+                  <span className="text-sm font-black text-white/78">{item}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -425,7 +509,7 @@ export function LandingPage() {
           <div>
             <p className="font-display text-2xl text-white">SignalCred</p>
             <p className="mt-2 max-w-xl text-sm font-black leading-6 text-white/46">
-              Bags-native launch, trust, and social finance layer. No fake stats, no detached social feed, no hidden proof.
+              Bags-native trust passport layer. No alpha promises, no generic social feed, no hidden proof.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-black text-white/46">
