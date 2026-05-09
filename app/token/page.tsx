@@ -301,10 +301,10 @@ export default function TokenListPage() {
     <div className="focus-shell">
       <p className="sr-only">Proof Risk Trust Tags Market Fees</p>
 
-      <section className="relative mb-4 overflow-hidden rounded-[28px] border border-[#314066]/55 bg-[#0d1020]/92 p-4 shadow-[0_22px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.055)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#66ffe1]/45 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#66ffe1]/30 via-transparent to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-[#ff6a84]/22 via-transparent to-transparent" />
+      <section className="relative mb-4 overflow-hidden rounded-[28px] border border-[#26324d]/32 bg-[#0d1020]/92 p-4 shadow-[0_22px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.025)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#66ffe1]/16 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#66ffe1]/10 via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-[#ff6a84]/8 via-transparent to-transparent" />
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0 max-w-4xl">
             <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -329,7 +329,7 @@ export default function TokenListPage() {
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-2 rounded-2xl border border-[#314066]/45 bg-black/24 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] xl:grid-cols-[minmax(360px,1fr)_auto] xl:items-center">
+        <div className="mt-5 grid gap-2 rounded-2xl border border-[#26324d]/30 bg-black/24 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)] xl:grid-cols-[minmax(360px,1fr)_auto] xl:items-center">
           <div className="relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/34 pointer-events-none" />
             <input
@@ -371,7 +371,7 @@ export default function TokenListPage() {
         </div>
         {importError && <p className="px-3 pb-2 text-xs font-body text-[#ff8a78]">{importError}</p>}
 
-        <div className="mt-4 rounded-2xl border border-[#314066]/45 bg-[#070913]/72 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+        <div className="mt-4 rounded-2xl border border-[#26324d]/28 bg-[#070913]/72 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)]">
           <div className="grid gap-2 text-xs font-body font-black text-white/58 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <span className="rounded-xl border border-[#00ff88]/12 bg-[#26aa68]/8 px-3 py-2 text-[#69d99a]">Bags feed <b className="ml-1 font-mono font-black tabular-nums">{formatCount(indexMeta.coverage?.feedCount ?? 0)}</b></span>
             <span className="rounded-xl border border-white/[0.045] bg-white/[0.035] px-3 py-2">Pools <b className="ml-1 font-mono font-black tabular-nums text-white/75">{formatCount(indexMeta.coverage?.migratedPoolCount ?? 0)}</b></span>
