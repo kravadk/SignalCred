@@ -146,7 +146,13 @@ export function TrustSignalsLive() {
                   </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex min-w-0 items-center gap-1.5">
-                    <p className="truncate text-sm font-body font-black text-white">{signal.name || signal.symbol}</p>
+                    <Link
+                      href={signal.href}
+                      className="truncate text-sm font-body font-black text-white transition-colors hover:text-[#69d99a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#69d99a]/60"
+                      title={`Open ${signal.name || signal.symbol}`}
+                    >
+                      {signal.name || signal.symbol}
+                    </Link>
                     <span className="shrink-0 text-[11px] font-mono text-white/28">/ {shortMint(signal.mint)}</span>
                   </div>
                   <div className="mt-1.5 flex min-w-0 items-center gap-2">
