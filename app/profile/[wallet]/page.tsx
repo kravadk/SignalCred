@@ -6,6 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { ArrowLeft, BadgeCheck, Camera, ChevronDown, ExternalLink, Gift, Loader2, MessageSquare, ReceiptText, Save, ShieldAlert, WalletCards, X } from "lucide-react";
 import { formatLamports, shortWallet } from "@/lib/utils";
 import { feeVelocitySubtitle, feeVelocityValue } from "@/lib/fee-velocity-display";
+import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 import { ExplorerLink, shortAddress, solscanUrl } from "@/components/ui/ExplorerLink";
 import { CreatorTrustGraph } from "@/components/profile/CreatorTrustGraph";
 import { CreatorTreasuryPanel } from "@/components/profile/CreatorTreasuryPanel";
@@ -95,22 +96,22 @@ function riskClass(severity: RiskFlag["severity"]) {
   return "border-white/10 bg-white/6 text-white/45";
 }
 
-function normalizeImageUrl(value?: string | null) {
-  const raw = value?.trim();
-  if (!raw) return null;
-  if (raw.startsWith("ipfs://")) return `https://ipfs.io/ipfs/${raw.slice("ipfs://".length)}`;
-  if (raw.startsWith("ar://")) return `https://arweave.net/${raw.slice("ar://".length)}`;
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:image/")) return raw;
-  return null;
-}
-
 function TokenAvatar({ src, symbol }: { src?: string | null; symbol: string }) {
-  const [failed, setFailed] = useState(false);
-  const image = failed ? null : normalizeImageUrl(src);
+  const [mode, setMode] = useState<"direct" | "proxy" | "failed">("direct");
+  const directSrc = normalizeImageUrl(src);
+  const proxySrc = proxiedImageUrl(src);
+  const image = mode === "direct" ? directSrc : mode === "proxy" ? proxySrc : null;
   return (
     <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#7a55c6] to-[#ff6a84] text-xs font-black text-white">
       {image ? (
-        <img src={image} alt={`${symbol} logo`} className="h-full w-full object-cover" loading="lazy" onError={() => setFailed(true)} />
+        <img
+          src={image}
+          alt={`${symbol} logo`}
+          className="h-full w-full object-cover"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setMode(mode === "direct" && proxySrc && proxySrc !== directSrc ? "proxy" : "failed")}
+        />
       ) : (
         symbol.slice(0, 2).toUpperCase()
       )}
@@ -119,13 +120,22 @@ function TokenAvatar({ src, symbol }: { src?: string | null; symbol: string }) {
 }
 
 function ProfileImage({ src, wallet, className = "h-16 w-16 rounded-2xl" }: { src?: string | null; wallet: string; className?: string }) {
-  const [failed, setFailed] = useState(false);
-  const image = failed ? null : normalizeImageUrl(src);
+  const [mode, setMode] = useState<"direct" | "proxy" | "failed">("direct");
+  const directSrc = normalizeImageUrl(src);
+  const proxySrc = proxiedImageUrl(src);
+  const image = mode === "direct" ? directSrc : mode === "proxy" ? proxySrc : null;
   const label = shortWallet(wallet).replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || "SC";
   return (
     <div className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-[#1adf91] via-[#34a8ff] to-[#8b5cf6] text-lg font-black text-white shadow-[0_0_24px_rgba(80,216,164,0.18)] ${className}`}>
       {image ? (
-        <img src={image} alt="Creator avatar" className="h-full w-full object-cover" loading="lazy" onError={() => setFailed(true)} />
+        <img
+          src={image}
+          alt="Creator avatar"
+          className="h-full w-full object-cover"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setMode(mode === "direct" && proxySrc && proxySrc !== directSrc ? "proxy" : "failed")}
+        />
       ) : (
         <span>{label}</span>
       )}

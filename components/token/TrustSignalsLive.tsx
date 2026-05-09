@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, BadgeCheck, ExternalLink, Radio, ShieldCheck, Sparkles } from "lucide-react";
+import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 
 type TrustSignalStatus = "verified" | "warming" | "pending" | "risk";
 
@@ -75,6 +76,30 @@ function groupSignalsByToken(signals: TrustSignal[]) {
   }
 
   return Array.from(groups.values());
+}
+
+function SignalImage({ signal }: { signal: TrustSignal }) {
+  const [mode, setMode] = useState<"direct" | "proxy" | "failed">("direct");
+  const directSrc = normalizeImageUrl(signal.imageUrl);
+  const proxySrc = proxiedImageUrl(signal.imageUrl);
+  const imageSrc = mode === "direct" ? directSrc : mode === "proxy" ? proxySrc : null;
+
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-[#26aa68] via-[#7a55c6] to-[#ff624e] text-xs font-mono font-black text-white">
+      {imageSrc ? (
+        <img
+          src={imageSrc}
+          alt=""
+          className="h-full w-full object-cover"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setMode(mode === "direct" && proxySrc && proxySrc !== directSrc ? "proxy" : "failed")}
+        />
+      ) : (
+        signal.symbol.slice(0, 1)
+      )}
+    </div>
+  );
 }
 
 export function TrustSignalsLive() {
@@ -169,9 +194,7 @@ export function TrustSignalsLive() {
             const hiddenCount = Math.max(signal.signals.length - labels.length, 0);
             return (
               <div key={signal.mint} className="flex min-w-[420px] items-center gap-3 rounded-xl border border-white/[0.045] bg-black/18 px-3 py-2.5 transition-colors hover:bg-white/[0.045]">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-[#26aa68] via-[#7a55c6] to-[#ff624e] text-xs font-mono font-black text-white">
-                    {signal.imageUrl ? <img src={signal.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" /> : signal.symbol.slice(0, 1)}
-                  </div>
+                <SignalImage signal={signal} />
                 <div className="min-w-0 flex-1">
                   <div className="flex min-w-0 items-center gap-1.5">
                     <Link

@@ -41,6 +41,7 @@ import { CampaignPlannerCard } from "@/components/token/CampaignPlannerCard";
 import { MilestonesCard } from "@/components/token/MilestonesCard";
 import { ProofRankedPostCard } from "@/components/square/ProofRankedPostCard";
 import { SocialValidationPanel } from "@/components/square/SocialValidationPanel";
+import { normalizeImageUrl as normalizeSharedImageUrl, proxiedImageUrl } from "@/lib/image-url";
 
 type Tab = "for-you" | "following" | "official" | "signals";
 type PostType = "update" | "analysis";
@@ -107,12 +108,7 @@ function avatarStyle(seed?: string | null) {
 }
 
 function normalizeImageUrl(value?: string | null) {
-  const raw = value?.trim();
-  if (!raw) return null;
-  if (raw.startsWith("ipfs://")) return `https://ipfs.io/ipfs/${raw.slice("ipfs://".length)}`;
-  if (raw.startsWith("ar://")) return `https://arweave.net/${raw.slice("ar://".length)}`;
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:image/")) return raw;
-  return null;
+  return normalizeSharedImageUrl(value);
 }
 
 function identiconDataUri(seed?: string | null, label = "SC") {
@@ -149,14 +145,17 @@ function RoundImage({
   seed?: string | null;
   className: string;
 }) {
-  const [failed, setFailed] = useState(false);
-  const image = !failed ? normalizeImageUrl(src) : null;
+  const [mode, setMode] = useState<"direct" | "proxy" | "failed">("direct");
+  const directSrc = normalizeImageUrl(src);
+  const proxySrc = proxiedImageUrl(src);
+  const image = mode === "direct" ? directSrc : mode === "proxy" ? proxySrc : null;
   return (
     <img
       src={image ?? identiconDataUri(seed, fallback)}
       alt={alt}
       loading="lazy"
-      onError={() => setFailed(true)}
+      referrerPolicy="no-referrer"
+      onError={() => setMode(mode === "direct" && proxySrc && proxySrc !== directSrc ? "proxy" : "failed")}
       className={cn("shrink-0 object-cover", className)}
     />
   );

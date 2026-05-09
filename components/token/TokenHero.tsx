@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BadgeCheck, Copy, ExternalLink, Loader2, ShieldCheck, TrendingDown, TrendingUp } from "lucide-react";
 import type { Token } from "@/db/schema";
 import { feeVelocitySubtitle, feeVelocityValue } from "@/lib/fee-velocity-display";
+import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 import { cn, formatLamports, formatPrice, formatTimeAgo, formatUsd, shortWallet } from "@/lib/utils";
 import { ExplorerLink, shortAddress } from "@/components/ui/ExplorerLink";
 
@@ -106,7 +107,7 @@ export function TokenHero({ token, mint }: { token: Token | null; mint: string }
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imageFailed, setImageFailed] = useState(false);
+  const [imageMode, setImageMode] = useState<"direct" | "proxy" | "failed">("direct");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -136,6 +137,9 @@ export function TokenHero({ token, mint }: { token: Token | null; mint: string }
   const name = identity?.name ?? token?.name ?? `Bags ${mint.slice(0, 4)}`;
   const symbol = identity?.symbol ?? token?.symbol ?? "BAGS";
   const imageUrl = identity?.imageUrl ?? token?.imageUrl ?? null;
+  const directImageUrl = normalizeImageUrl(imageUrl);
+  const proxyImageUrl = proxiedImageUrl(imageUrl);
+  const resolvedImageUrl = imageMode === "direct" ? directImageUrl : imageMode === "proxy" ? proxyImageUrl : null;
   const creatorWallet = identity?.creatorWallet ?? token?.creatorWallet ?? null;
   const market = summary?.market ?? null;
   const fees = summary?.fees ?? {};
@@ -162,14 +166,14 @@ export function TokenHero({ token, mint }: { token: Token | null; mint: string }
       <div className="relative flex flex-col gap-4">
         <div className="flex items-start gap-4">
           <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#26aa68] via-[#7a55c6] to-[#ff6a84] text-2xl font-display font-bold text-white shadow-[0_10px_28px_rgba(0,0,0,0.28)]">
-            {imageUrl && !imageFailed ? (
+            {resolvedImageUrl ? (
               <img
-                src={imageUrl}
+                src={resolvedImageUrl}
                 alt={name}
                 className="h-full w-full object-cover"
                 loading="eager"
                 referrerPolicy="no-referrer"
-                onError={() => setImageFailed(true)}
+                onError={() => setImageMode(imageMode === "direct" && proxyImageUrl && proxyImageUrl !== directImageUrl ? "proxy" : "failed")}
               />
             ) : (
               symbol.slice(0, 1)

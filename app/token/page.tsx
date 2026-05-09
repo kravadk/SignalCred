@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, BadgeCheck, Flame, Rocket, Search } from "lucide-react";
 import { TrustSignalsLive } from "@/components/token/TrustSignalsLive";
 import { feeVelocityValue } from "@/lib/fee-velocity-display";
+import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 import { cn, formatMarketCap, formatPrice, formatTimeAgo, formatUsd } from "@/lib/utils";
 
 interface TokenRow {
@@ -184,22 +185,25 @@ function feeSubtitle(t: TokenRow) {
 }
 
 function TokenAvatar({ token, gradClass }: { token: TokenRow; gradClass: string }) {
-  const [failed, setFailed] = useState(false);
+  const [mode, setMode] = useState<"direct" | "proxy" | "failed">("direct");
   const initial = token.symbol?.[0] ?? "?";
+  const directSrc = normalizeImageUrl(token.imageUrl);
+  const proxySrc = proxiedImageUrl(token.imageUrl);
+  const imageSrc = mode === "direct" ? directSrc : mode === "proxy" ? proxySrc : null;
 
   return (
     <div
       className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${gradClass} flex items-center justify-center text-base font-display font-bold text-white shrink-0 overflow-hidden`}
       style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.3)" }}
     >
-      {token.imageUrl && !failed ? (
+      {imageSrc ? (
         <img
-          src={token.imageUrl}
+          src={imageSrc}
           alt=""
           className="h-full w-full object-cover"
           loading="lazy"
           referrerPolicy="no-referrer"
-          onError={() => setFailed(true)}
+          onError={() => setMode(mode === "direct" && proxySrc && proxySrc !== directSrc ? "proxy" : "failed")}
         />
       ) : (
         initial

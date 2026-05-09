@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { feeVelocitySubtitle, feeVelocityValue } from "@/lib/fee-velocity-display";
+import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 import { formatLamports, formatPrice, formatUsd, shortWallet } from "@/lib/utils";
 
 type ViewMode = "top_tokens" | "top_creators" | "fee_velocity" | "verified" | "risky";
@@ -82,6 +83,19 @@ function generated24hLabel(status?: string, lamports?: number | null) {
   if (status === "active") return feeVelocityValue(status, lamports);
   if (status === "unavailable") return "Unavailable";
   return "Needs 24h baseline";
+}
+
+function TokenLogo({ token }: { token: LeaderboardToken }) {
+  const imageUrl = proxiedImageUrl(token.imageUrl) ?? normalizeImageUrl(token.imageUrl);
+  return (
+    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#7a55c6] to-[#ff6a84] flex items-center justify-center text-xs font-display font-bold text-white shrink-0 overflow-hidden">
+      {imageUrl ? (
+        <img src={imageUrl} alt={token.symbol} className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+      ) : (
+        token.symbol[0]
+      )}
+    </div>
+  );
 }
 
 export function CreatorReputationHub() {
@@ -344,9 +358,7 @@ export function CreatorReputationHub() {
             >
               <div className="hidden text-base font-mono tabular-nums text-white/35 md:block md:col-span-1 xl:col-auto">{index + 1}</div>
               <div className="md:col-span-4 xl:col-auto flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#7a55c6] to-[#ff6a84] flex items-center justify-center text-xs font-display font-bold text-white shrink-0 overflow-hidden">
-                  {token.imageUrl ? <img src={token.imageUrl} alt={token.symbol} className="w-full h-full object-cover" /> : token.symbol[0]}
-                </div>
+                <TokenLogo token={token} />
                 <div className="min-w-0">
                   <p className="text-white font-fun font-black text-sm truncate 2xl:text-base">{index + 1}. {token.name}</p>
                 <p className="text-white/45 text-xs truncate">

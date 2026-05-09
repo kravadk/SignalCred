@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, Network } from "lucide-react";
 import { formatLamports, shortWallet } from "@/lib/utils";
 import { feeVelocityValue } from "@/lib/fee-velocity-display";
+import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 
 type GraphToken = {
   mint: string;
@@ -29,6 +30,19 @@ function roleTone(role: LinkedWallet["role"]) {
   if (role === "admin") return "border-[#b48dff]/18 bg-[#b48dff]/8 text-[#cdb6ff]";
   if (role === "campaign_funder") return "border-[#26a17b]/18 bg-[#26a17b]/8 text-[#50d8a4]";
   return "border-[#ffb84d]/18 bg-[#ffb84d]/8 text-[#ffcc7a]";
+}
+
+function TokenLogo({ token }: { token: GraphToken }) {
+  const imageUrl = proxiedImageUrl(token.imageUrl) ?? normalizeImageUrl(token.imageUrl);
+  return (
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#26aa68] via-[#7a55c6] to-[#ff6a84] font-display text-white">
+      {imageUrl ? (
+        <img src={imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+      ) : (
+        token.symbol.slice(0, 1)
+      )}
+    </div>
+  );
 }
 
 export function LinkedTokenNetwork({ tokens, wallets }: { tokens: GraphToken[]; wallets: LinkedWallet[] }) {
@@ -71,9 +85,7 @@ export function LinkedTokenNetwork({ tokens, wallets }: { tokens: GraphToken[]; 
         {tokens.length ? tokens.map((token) => (
           <div key={token.mint} className="rounded-2xl border border-white/8 bg-white/[0.035] p-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#26aa68] via-[#7a55c6] to-[#ff6a84] font-display text-white">
-                {token.imageUrl ? <img src={token.imageUrl} alt="" className="h-full w-full object-cover" /> : token.symbol.slice(0, 1)}
-              </div>
+              <TokenLogo token={token} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate font-fun font-black text-white">{token.name}</p>

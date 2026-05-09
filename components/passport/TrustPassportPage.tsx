@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink, ShieldAlert } from "lucide-react";
 import { PassportProofChecklist } from "@/components/passport/PassportProofChecklist";
 import { PassportVerdict } from "@/components/passport/PassportVerdict";
+import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 import type { TokenPassportResponse } from "@/lib/trust-passport";
 import { cn, shortWallet } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ function scoreLabel(key: string) {
 
 export function TrustPassportPage({ passport }: { passport: TokenPassportResponse }) {
   const numericBreakdown = Object.entries(passport.scoreBreakdown).filter(([, value]) => typeof value === "number");
+  const imageUrl = proxiedImageUrl(passport.token.imageUrl) ?? normalizeImageUrl(passport.token.imageUrl);
 
   return (
     <div className="mx-auto w-full max-w-[1680px] px-3 py-3 md:px-4 2xl:px-5">
@@ -48,7 +50,7 @@ export function TrustPassportPage({ passport }: { passport: TokenPassportRespons
         <aside className="card p-3">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#26aa68] via-[#7a55c6] to-[#ff6a84] font-mono text-lg font-black text-white">
-              {passport.token.imageUrl ? <img src={passport.token.imageUrl} alt="" className="h-full w-full object-cover" /> : passport.token.symbol.slice(0, 1)}
+              {imageUrl ? <img src={imageUrl} alt="" className="h-full w-full object-cover" /> : passport.token.symbol.slice(0, 1)}
             </div>
             <div className="min-w-0">
               <h2 className="truncate font-mono text-base font-black leading-none text-white">{passport.token.name}</h2>
