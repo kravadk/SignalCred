@@ -134,12 +134,12 @@ export default async function TokenPage({ params }: { params: { mint: string } }
 
   return (
     <div className="focus-shell">
-      <div className="mb-3 rounded-2xl border border-[#314066]/45 bg-[#0d1020]/88 p-2 shadow-[0_12px_34px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.04)]">
-        <div className="grid gap-2 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
-          <div className="flex min-w-0 items-center gap-2">
+      <div className="mb-3 rounded-2xl border border-[#314066]/45 bg-[#0d1020]/88 p-1.5 shadow-[0_12px_34px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex min-w-0 items-center gap-1.5">
             <Link
               href="/token"
-              className="inline-flex min-h-[34px] shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs font-mono font-bold text-white/62 transition-colors hover:border-white/16 hover:bg-white/[0.075] hover:text-white"
+              className="inline-flex min-h-[32px] shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs font-mono font-bold text-white/62 transition-colors hover:border-white/16 hover:bg-white/[0.075] hover:text-white"
             >
               <ArrowLeft size={15} />
               All tokens
@@ -149,16 +149,16 @@ export default async function TokenPage({ params }: { params: { mint: string } }
             </span>
           </div>
 
-          <span className="inline-flex min-h-[34px] items-center justify-center gap-2 rounded-lg border border-[#00ff88]/18 bg-[#00ff88]/9 px-3 text-xs font-mono font-bold uppercase tracking-[0.08em] text-[#69d99a]">
+          <span className="inline-flex min-h-[32px] items-center justify-center gap-2 rounded-lg border border-[#00ff88]/18 bg-[#00ff88]/9 px-3 text-xs font-mono font-bold uppercase tracking-[0.08em] text-[#69d99a]">
             <BadgeCheck size={13} /> Bags evidence
           </span>
 
-          <div className="flex flex-wrap items-center justify-start gap-2 lg:justify-end">
+          <div className="ml-0 flex flex-wrap items-center gap-1.5 lg:ml-auto">
             <a
               href={`https://solscan.io/token/${params.mint}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-[34px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs font-mono font-bold text-white/62 transition-colors hover:border-white/16 hover:bg-white/[0.075] hover:text-white"
+              className="inline-flex min-h-[32px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs font-mono font-bold text-white/62 transition-colors hover:border-white/16 hover:bg-white/[0.075] hover:text-white"
             >
               Solscan
               <ExternalLink size={13} />
@@ -167,7 +167,7 @@ export default async function TokenPage({ params }: { params: { mint: string } }
               href={`https://bags.fm/${params.mint}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-[34px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs font-mono font-bold text-white/62 transition-colors hover:border-white/16 hover:bg-white/[0.075] hover:text-white"
+              className="inline-flex min-h-[32px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.045] px-3 text-xs font-mono font-bold text-white/62 transition-colors hover:border-white/16 hover:bg-white/[0.075] hover:text-white"
             >
               Bags.fm
               <ExternalLink size={13} />
@@ -175,7 +175,7 @@ export default async function TokenPage({ params }: { params: { mint: string } }
             {token?.creatorWallet && (
               <Link
                 href={`/profile/${token.creatorWallet}`}
-                className="inline-flex min-h-[34px] items-center gap-2 rounded-lg border border-[#b48dff]/18 bg-[#b48dff]/10 px-3 text-xs font-mono font-bold text-[#cdb6ff] transition-colors hover:bg-[#b48dff]/14 hover:text-white"
+                className="inline-flex min-h-[32px] items-center gap-2 rounded-lg border border-[#b48dff]/18 bg-[#b48dff]/10 px-3 text-xs font-mono font-bold text-[#cdb6ff] transition-colors hover:bg-[#b48dff]/14 hover:text-white"
               >
                 Creator
                 <UserRound size={13} />
@@ -183,7 +183,7 @@ export default async function TokenPage({ params }: { params: { mint: string } }
             )}
             <Link
               href={`/passport/${params.mint}`}
-              className="inline-flex min-h-[34px] items-center gap-2 rounded-lg border border-[#00ff88]/18 bg-[#00ff88]/8 px-3 text-xs font-mono font-bold text-[#69d99a] transition-colors hover:bg-[#00ff88]/12 hover:text-white"
+              className="inline-flex min-h-[32px] items-center gap-2 rounded-lg border border-[#00ff88]/18 bg-[#00ff88]/8 px-3 text-xs font-mono font-bold text-[#69d99a] transition-colors hover:bg-[#00ff88]/12 hover:text-white"
             >
               Passport
               <ExternalLink size={13} />
