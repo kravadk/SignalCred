@@ -6,11 +6,13 @@ import { getTokenOverview } from "@/lib/birdeye";
 import {
   getBagsClaimEvents,
   getBagsCreators,
+  getBagsLaunchFeed,
   getBagsLifetimeFees,
   getBagsPoolByMint,
 } from "@/lib/bags-index";
 import { getFeeVelocity24h } from "@/lib/fee-velocity";
 import { feeVelocityValue } from "@/lib/fee-velocity-display";
+import { normalizeImageUrl } from "@/lib/image-url";
 
 export const dynamic = "force-dynamic";
 
@@ -32,22 +34,6 @@ function readBagsMeta(metadata: unknown): Record<string, unknown> {
     : {};
 }
 
-function normalizeImageUrl(value?: string | null) {
-  if (!value || typeof value !== "string") return null;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (trimmed.startsWith("ipfs://")) {
-    return `https://ipfs.io/ipfs/${trimmed.replace("ipfs://", "").replace(/^ipfs\//, "")}`;
-  }
-  try {
-    const url = new URL(trimmed);
-    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
 function sumClaimEventsLamports(events: Array<{ amount?: string }>) {
   return events.reduce((sum, event) => {
     const value = Number(event.amount ?? 0);
@@ -57,6 +43,63 @@ function sumClaimEventsLamports(events: Array<{ amount?: string }>) {
 
 function sourceStatus(source: unknown) {
   return typeof source === "string" && source ? source : "pending";
+}
+
+function readStringField(source: unknown, keys: string[]) {
+  if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+  const record = source as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+function readMetadataImage(metadata: unknown) {
+  const rootImage = readStringField(metadata, ["imageUrl", "image", "image_uri", "logoURI", "logo"]);
+  if (rootImage) return normalizeImageUrl(rootImage);
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;
+  const root = metadata as Record<string, unknown>;
+  return normalizeImageUrl(readStringField(root.bags, ["imageUrl", "image", "image_uri", "logoURI", "logo"]));
+}
+
+async function readImageFromMetadataUri(uri?: string | null) {
+  const metadataUrl = normalizeImageUrl(uri);
+  if (!metadataUrl || metadataUrl.startsWith("data:image/")) return null;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2_500);
+    const res = await fetch(metadataUrl, {
+      signal: controller.signal,
+      headers: { accept: "application/json,text/plain;q=0.9,*/*;q=0.8" },
+      cache: "no-store",
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!contentType.includes("json") && !contentType.includes("text")) return null;
+    const text = await res.text();
+    if (text.length > 256_000) return null;
+    const json = JSON.parse(text) as unknown;
+    return readMetadataImage(json);
+  } catch {
+    return null;
+  }
+}
+
+async function getLiveBagsImage(mint: string, metadataUri?: string | null) {
+  const directFromMetadata = await readImageFromMetadataUri(metadataUri);
+  if (directFromMetadata) return directFromMetadata;
+
+  try {
+    const feed = await withTimeout(getBagsLaunchFeed(), 3_500, []);
+    const item = feed.find((entry) => entry.tokenMint === mint);
+    const directImage = normalizeImageUrl(item?.image);
+    if (directImage) return directImage;
+    return readImageFromMetadataUri(item?.uri);
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(_req: NextRequest, { params }: { params: { mint: string } }) {
@@ -77,6 +120,16 @@ export async function GET(_req: NextRequest, { params }: { params: { mint: strin
     withTimeout(getBagsClaimEvents(params.mint, { from: since24h, to: now, limit: 100 }), 2_500, []),
     withTimeout(db.select().from(posts).where(eq(posts.tokenMint, params.mint)).limit(50), 2_500, []),
   ]);
+  const cachedImageUrl =
+    normalizeImageUrl(token?.imageUrl) ??
+    readMetadataImage(token?.metadata) ??
+    normalizeImageUrl(marketData?.logoURI);
+  const liveBagsImageUrl = cachedImageUrl
+    ? null
+    : await getLiveBagsImage(
+        params.mint,
+        typeof bagsMeta.uri === "string" ? bagsMeta.uri : null
+      );
 
   const lifetimeFeesLamports = Number(lifetimeFeesRaw ?? 0);
   const safeLifetimeFeesLamports = Number.isFinite(lifetimeFeesLamports) ? lifetimeFeesLamports : 0;
@@ -128,7 +181,7 @@ export async function GET(_req: NextRequest, { params }: { params: { mint: strin
       name: token?.name ?? marketData?.name ?? `Bags ${params.mint.slice(0, 4)}`,
       symbol: token?.symbol ?? marketData?.symbol ?? "BAGS",
       description: token?.description ?? null,
-      imageUrl: normalizeImageUrl(token?.imageUrl) ?? normalizeImageUrl(marketData?.logoURI),
+      imageUrl: cachedImageUrl ?? liveBagsImageUrl,
       launchStatus: token?.launchStatus ?? "live",
       creatorWallet: token?.creatorWallet ?? creator?.wallet ?? null,
       launchedAt: token?.launchedAt ?? token?.createdAt ?? null,
