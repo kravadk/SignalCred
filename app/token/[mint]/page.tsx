@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft, BadgeCheck, ExternalLink, Globe2, MessageCircle, Send, UserRound } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ExternalLink, Globe2, MessageCircle, Send, ShieldCheck, UserRound } from "lucide-react";
 import { eq, desc } from "drizzle-orm";
 import { TokenHero } from "@/components/token/TokenHero";
 import { PriceChart } from "@/components/token/PriceChart";
@@ -54,42 +54,65 @@ function CompactTokenInfo({ token, mint }: { token: Token | null; mint: string }
   const hasLinks = Boolean(token?.websiteUrl || token?.twitterUrl || token?.telegramUrl || token?.whitepaperUrl);
 
   return (
-    <div className="card p-4 space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <div>
+    <div className="card p-3">
+      <div className="grid gap-3 xl:grid-cols-[1fr_auto] xl:items-center">
+        <div className="min-w-0">
           <p className="text-sm font-body font-black text-white">Source links</p>
-          <p className="text-xs font-body font-semibold text-white/42">Explorer, creator profile, and official token context.</p>
+          <p className="mt-0.5 text-xs font-body font-semibold text-white/42">Explorer, creator profile, and official token context.</p>
         </div>
-        <a
-          href={`https://bags.fm/${mint}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-[34px] items-center gap-1.5 rounded-xl border border-[#00ff88]/20 bg-[#00ff88]/10 px-3 text-xs font-body font-black text-[#00ff88] hover:bg-[#00ff88]/14"
-        >
-          Bags.fm <ExternalLink size={12} />
-        </a>
-      </div>
-
-      {token?.description && (
-        <p className="line-clamp-3 text-sm font-body leading-6 text-white/56">{token.description}</p>
-      )}
-
-      {hasLinks && (
         <div className="flex flex-wrap gap-2">
+          <a
+            href={`https://bags.fm/${mint}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border border-[#00ff88]/18 bg-[#00ff88]/8 px-3 text-xs font-body font-black text-[#00ff88] hover:bg-[#00ff88]/14"
+          >
+            Bags.fm <ExternalLink size={12} />
+          </a>
+          <a
+            href={`https://solscan.io/token/${mint}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border border-white/[0.055] bg-white/[0.035] px-3 text-xs font-body font-black text-white/60 hover:bg-white/[0.06] hover:text-white"
+          >
+            Solscan <ExternalLink size={12} />
+          </a>
+          {token?.creatorWallet && (
+            <Link
+              href={`/profile/${token.creatorWallet}`}
+              className="inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border border-[#b48dff]/16 bg-[#b48dff]/8 px-3 text-xs font-body font-black text-[#cdb6ff] hover:bg-[#b48dff]/14"
+            >
+              Creator <UserRound size={12} />
+            </Link>
+          )}
           <SocialLink href={token?.websiteUrl} label="Web" icon={Globe2} />
           <SocialLink href={token?.twitterUrl} label="Twitter" icon={MessageCircle} />
           <SocialLink href={token?.telegramUrl} label="Telegram" icon={Send} />
           <SocialLink href={token?.whitepaperUrl} label="Docs" icon={ExternalLink} />
         </div>
-      )}
+      </div>
 
-      {token?.creatorWallet && (
-        <Link
-          href={`/profile/${token.creatorWallet}`}
-          className="inline-flex min-h-[34px] items-center gap-1.5 rounded-xl border border-[#b48dff]/18 bg-[#b48dff]/10 px-3 text-xs font-body font-black text-[#cdb6ff] hover:bg-[#b48dff]/14"
-        >
-          Creator reputation <ExternalLink size={12} />
-        </Link>
+      <div className="mt-3 grid gap-2 border-t border-white/[0.045] pt-3 md:grid-cols-3">
+        <div className="rounded-lg bg-white/[0.025] px-3 py-2">
+          <p className="text-[10px] font-body font-black uppercase tracking-[0.12em] text-white/30">Bags source</p>
+          <p className="mt-1 flex items-center gap-1.5 text-xs font-body font-black text-[#69d99a]">
+            <ShieldCheck size={12} /> linked
+          </p>
+        </div>
+        <div className="rounded-lg bg-white/[0.025] px-3 py-2">
+          <p className="text-[10px] font-body font-black uppercase tracking-[0.12em] text-white/30">Creator</p>
+          <p className="mt-1 truncate text-xs font-body font-black text-white/68">
+            {token?.creatorWallet ? `${token.creatorWallet.slice(0, 5)}...${token.creatorWallet.slice(-4)}` : "pending"}
+          </p>
+        </div>
+        <div className="rounded-lg bg-white/[0.025] px-3 py-2">
+          <p className="text-[10px] font-body font-black uppercase tracking-[0.12em] text-white/30">Social links</p>
+          <p className="mt-1 text-xs font-body font-black text-white/68">{hasLinks ? "available" : "pending"}</p>
+        </div>
+      </div>
+
+      {token?.description && (
+        <p className="mt-3 line-clamp-2 text-sm font-body leading-6 text-white/56">{token.description}</p>
       )}
     </div>
   );
@@ -212,6 +235,57 @@ export default async function TokenPage({ params }: { params: { mint: string } }
 
           <CompactTokenInfo token={token} mint={params.mint} />
 
+          <section className="min-w-0 rounded-xl border border-white/[0.045] bg-[#100b22]/34 p-3">
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-3 px-1">
+              <div>
+                <h2 className="font-body text-base font-black text-white">Token Proof Workspace</h2>
+                <p className="mt-1 text-xs font-body font-semibold leading-5 text-white/54">
+                  Evidence, fees, social context, liquidity, and campaign proof in one review area.
+                </p>
+              </div>
+              <Link
+                href={`/passport/${params.mint}`}
+                className="inline-flex min-h-[34px] items-center gap-2 rounded-md border border-[#00ff88]/18 bg-[#00ff88]/8 px-3 text-xs font-mono font-bold text-[#69d99a] transition-colors hover:bg-[#00ff88]/12 hover:text-white"
+              >
+                Open Passport
+                <ExternalLink size={13} />
+              </Link>
+            </div>
+
+            <div className="min-w-0 space-y-2">
+              <DetailSection title="Evidence checklist" subtitle="Bags, Solscan, DexScreener, Meteora proof rows">
+                <EvidencePanel mint={params.mint} />
+              </DetailSection>
+              <DetailSection title="Fee Loop Evidence" subtitle="Generated, claimed, receipt, campaign proof">
+                <FeeLoopEvidenceCard mint={params.mint} />
+              </DetailSection>
+              <DetailSection title="Trust Profile" subtitle="Score breakdown, source labels, and risk flags">
+                <TrustProfileCard mint={params.mint} />
+              </DetailSection>
+              <DetailSection title="Fee reputation" subtitle="Creator fees, USDT estimate, and risk labels">
+                <FeeReputationCard mint={params.mint} />
+              </DetailSection>
+              <DetailSection title="Social proof" subtitle="Token-linked posts, wallets, reactions, and spam risk">
+                <SocialProofCard mint={params.mint} />
+              </DetailSection>
+              <DetailSection title="Milestones" subtitle="Completed and pending token proof milestones">
+                <MilestonesCard mint={params.mint} />
+              </DetailSection>
+              <DetailSection title="Official updates" subtitle="Creator/admin posts attached to this token">
+                <OfficialUpdates mint={params.mint} symbol={symbol} creatorWallet={token?.creatorWallet ?? null} />
+              </DetailSection>
+              <DetailSection title="Community context" subtitle="Recent token-linked community activity">
+                <CommunityHoldersCard mint={params.mint} symbol={symbol} socialPosts={socialPosts} />
+              </DetailSection>
+              <DetailSection title="Liquidity" subtitle="Pool status, TVL, route, and market source">
+                <LiquidityPanel mint={params.mint} symbol={symbol} />
+              </DetailSection>
+              <DetailSection title="USDT rewards" subtitle="Campaign budget planner and funding proof">
+                <CampaignPlannerCard mint={params.mint} />
+              </DetailSection>
+            </div>
+          </section>
+
         </main>
 
         <aside className="space-y-3 xl:sticky xl:top-20 xl:self-start">
@@ -225,57 +299,6 @@ export default async function TokenPage({ params }: { params: { mint: string } }
           </section>
         </aside>
       </div>
-
-      <section className="mt-3 min-w-0 rounded-xl border border-white/[0.045] bg-[#100b22]/34 p-3">
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-3 px-1">
-          <div>
-            <h2 className="font-body text-base font-black text-white">Token Proof Workspace</h2>
-            <p className="mt-1 text-xs font-body font-semibold leading-5 text-white/54">
-              Evidence, fees, social context, liquidity, and campaign proof in one review area.
-            </p>
-          </div>
-          <Link
-            href={`/passport/${params.mint}`}
-            className="inline-flex min-h-[34px] items-center gap-2 rounded-md border border-[#00ff88]/18 bg-[#00ff88]/8 px-3 text-xs font-mono font-bold text-[#69d99a] transition-colors hover:bg-[#00ff88]/12 hover:text-white"
-          >
-            Open Passport
-            <ExternalLink size={13} />
-          </Link>
-        </div>
-
-        <div className="min-w-0 space-y-2">
-          <DetailSection title="Evidence checklist" subtitle="Bags, Solscan, DexScreener, Meteora proof rows">
-            <EvidencePanel mint={params.mint} />
-          </DetailSection>
-          <DetailSection title="Fee Loop Evidence" subtitle="Generated, claimed, receipt, campaign proof">
-            <FeeLoopEvidenceCard mint={params.mint} />
-          </DetailSection>
-          <DetailSection title="Trust Profile" subtitle="Score breakdown, source labels, and risk flags">
-            <TrustProfileCard mint={params.mint} />
-          </DetailSection>
-          <DetailSection title="Fee reputation" subtitle="Creator fees, USDT estimate, and risk labels">
-            <FeeReputationCard mint={params.mint} />
-          </DetailSection>
-          <DetailSection title="Social proof" subtitle="Token-linked posts, wallets, reactions, and spam risk">
-            <SocialProofCard mint={params.mint} />
-          </DetailSection>
-          <DetailSection title="Milestones" subtitle="Completed and pending token proof milestones">
-            <MilestonesCard mint={params.mint} />
-          </DetailSection>
-          <DetailSection title="Official updates" subtitle="Creator/admin posts attached to this token">
-            <OfficialUpdates mint={params.mint} symbol={symbol} creatorWallet={token?.creatorWallet ?? null} />
-          </DetailSection>
-          <DetailSection title="Community context" subtitle="Recent token-linked community activity">
-            <CommunityHoldersCard mint={params.mint} symbol={symbol} socialPosts={socialPosts} />
-          </DetailSection>
-          <DetailSection title="Liquidity" subtitle="Pool status, TVL, route, and market source">
-            <LiquidityPanel mint={params.mint} symbol={symbol} />
-          </DetailSection>
-          <DetailSection title="USDT rewards" subtitle="Campaign budget planner and funding proof">
-            <CampaignPlannerCard mint={params.mint} />
-          </DetailSection>
-        </div>
-      </section>
     </div>
   );
 }
