@@ -301,9 +301,9 @@ export default function TokenListPage() {
     <div className="focus-shell">
       <p className="sr-only">Proof Risk Trust Tags Market Fees</p>
 
-      <section className="relative mb-4 overflow-hidden rounded-[28px] border border-[#26324d]/32 bg-[#0d1020]/92 p-4 shadow-[0_22px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.025)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#66ffe1]/16 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#66ffe1]/10 via-transparent to-transparent" />
+      <section className="relative mb-4 overflow-hidden rounded-[28px] border border-[#26324d]/22 bg-[#0d1020]/92 p-4 shadow-[0_18px_56px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.018)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#66ffe1]/8 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#66ffe1]/5 via-transparent to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-[#ff6a84]/8 via-transparent to-transparent" />
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0 max-w-4xl">
@@ -420,8 +420,8 @@ export default function TokenListPage() {
       ) : (
         <div className="space-y-3">
           <div className="hidden xl:block">
-          <div className="relative overflow-hidden rounded-[28px] border border-[#314066]/55 bg-[#0a0d19]/94 shadow-[0_24px_72px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.045)]">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
+          <div className="relative overflow-hidden rounded-[28px] border border-[#314066]/28 bg-[#0a0d19]/94 shadow-[0_20px_60px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.025)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
             <div
               className="grid items-center gap-x-1 border-b border-white/[0.045] bg-white/[0.045] px-2 py-3 text-right text-[9px] font-body font-black uppercase tracking-[0.14em] text-white/68 2xl:gap-x-2 2xl:px-3 2xl:text-[11px]"
               style={{ gridTemplateColumns: DESKTOP_TABLE_COLUMNS }}

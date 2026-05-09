@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, createContext, useContext, ReactNode } from "react";
+import { useEffect, useRef, useState, createContext, useContext, ReactNode } from "react";
 
 type Toast = { id: number; kind: "success" | "error" | "info"; text: string };
 
@@ -7,10 +7,21 @@ const ToastCtx = createContext<{ push: (t: Omit<Toast, "id">) => void }>({ push:
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const recentToastRef = useRef<Map<string, number>>(new Map());
+
   const push = (t: Omit<Toast, "id">) => {
+    const key = `${t.kind}:${t.text}`;
+    const now = Date.now();
+    const lastSeen = recentToastRef.current.get(key) ?? 0;
+    if (now - lastSeen < 3500) return;
+    recentToastRef.current.set(key, now);
+
     const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { ...t, id }]);
-    setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), 5000);
+    setToasts((prev) => [...prev, { ...t, id }].slice(-4));
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((x) => x.id !== id));
+      if (recentToastRef.current.get(key) === now) recentToastRef.current.delete(key);
+    }, 5000);
   };
   return (
     <ToastCtx.Provider value={{ push }}>

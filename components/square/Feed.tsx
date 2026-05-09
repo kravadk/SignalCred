@@ -1508,10 +1508,10 @@ function FeedSidebar() {
   }, []);
 
   return (
-    <aside className="sticky top-5 hidden h-fit w-[280px] shrink-0 space-y-3 lg:block">
+    <aside className="sticky top-[76px] hidden max-h-[calc(100vh-92px)] w-[280px] shrink-0 space-y-3 overflow-hidden lg:block">
       <p className="sr-only">Token-linked posts only. Official updates require creator/admin proof. Campaigns and milestones must reference a real mint. No generic engagement farming in demo flow.</p>
 
-      <section className="rounded-xl border border-white/8 bg-white/[0.04] p-3">
+      <section className="rounded-xl border border-white/[0.045] bg-white/[0.04] p-3 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
         <p className="mb-2 text-[11px] font-mono font-bold uppercase tracking-[0.12em] text-white/40">Tokens moving</p>
         {trending.length === 0 ? (
           <p className="text-sm font-medium text-white/45">No token activity yet.</p>

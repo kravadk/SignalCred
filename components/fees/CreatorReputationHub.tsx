@@ -201,8 +201,8 @@ export function CreatorReputationHub() {
 
   return (
     <div className="focus-shell pt-3">
-      <section className="mb-3 rounded-[28px] border border-white/[0.055] bg-[#100b22]/82 shadow-[0_22px_60px_rgba(0,0,0,0.24)]">
-        <div className="flex flex-col gap-3 border-b border-white/[0.055] px-3 py-2 md:flex-row md:items-center md:justify-between">
+      <section className="mb-3 rounded-[28px] border border-[#26324d]/25 bg-[#100b22]/82 shadow-[0_18px_48px_rgba(0,0,0,0.2)]">
+        <div className="flex flex-col gap-3 border-b border-[#26324d]/24 px-3 py-2 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-md border border-[#00ff88]/20 bg-[#00ff88]/8 px-2 py-1 text-[11px] font-fun font-bold uppercase text-[#69d99a]">
@@ -234,7 +234,7 @@ export function CreatorReputationHub() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 border-b border-white/[0.045] px-3 py-2 text-[11px] font-mono text-white/50">
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-[#26324d]/20 px-3 py-2 text-[11px] font-mono text-white/50">
           <span className="rounded-md border border-[#00ff88]/20 bg-[#00ff88]/8 px-2 py-1 text-[#69d99a]">
             Lifetime {formatLamports(totalFees)}
           </span>
@@ -297,7 +297,7 @@ export function CreatorReputationHub() {
           <p className="text-white/35 font-fun text-sm">Waiting for live Bags feed data. No local demo rows are shown here.</p>
         </div>
       ) : view === "top_creators" ? (
-        <div className="card overflow-hidden border-white/[0.055]">
+        <div className="card overflow-hidden border-[#26324d]/28">
           {creators.map((creator, index) => (
             <Link
               key={creator.wallet}
@@ -332,7 +332,7 @@ export function CreatorReputationHub() {
           ))}
         </div>
       ) : (
-        <div className="card overflow-hidden border-white/[0.055]">
+        <div className="card overflow-hidden border-[#26324d]/28">
           <div
             className="hidden xl:grid gap-x-2 px-4 py-3 border-b border-white/8 text-white/35 text-[10px] font-fun font-black uppercase tracking-wider 2xl:text-[11px]"
             style={{ gridTemplateColumns: TOKEN_TABLE_COLUMNS }}

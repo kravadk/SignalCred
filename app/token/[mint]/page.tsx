@@ -57,8 +57,8 @@ function CompactTokenInfo({ token, mint }: { token: Token | null; mint: string }
     <div className="card p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-body font-black text-white">Token links</p>
-          <p className="text-xs font-body font-semibold text-white/42">Official sources for the token context.</p>
+          <p className="text-sm font-body font-black text-white">Source links</p>
+          <p className="text-xs font-body font-semibold text-white/42">Explorer, creator profile, and official token context.</p>
         </div>
         <a
           href={`https://bags.fm/${mint}`}
@@ -210,6 +210,8 @@ export default async function TokenPage({ params }: { params: { mint: string } }
             <PriceChart mint={params.mint} />
           </section>
 
+          <CompactTokenInfo token={token} mint={params.mint} />
+
         </main>
 
         <aside className="space-y-3 xl:sticky xl:top-20 xl:self-start">
@@ -271,9 +273,6 @@ export default async function TokenPage({ params }: { params: { mint: string } }
           </DetailSection>
           <DetailSection title="USDT rewards" subtitle="Campaign budget planner and funding proof">
             <CampaignPlannerCard mint={params.mint} />
-          </DetailSection>
-          <DetailSection title="Token links" subtitle="Official links and creator reputation">
-            <CompactTokenInfo token={token} mint={params.mint} />
           </DetailSection>
         </div>
       </section>

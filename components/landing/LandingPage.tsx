@@ -201,10 +201,10 @@ export function LandingPage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/launch"
-                className="group landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ff4f6d,#ff8b45)] px-6 text-base font-black text-white shadow-[0_22px_54px_rgba(255,79,109,0.28)] transition hover:translate-y-[-2px] hover:shadow-[0_28px_72px_rgba(255,92,122,0.36)]"
+                className="group landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[linear-gradient(135deg,#ff4f6d,#ff8b45)] px-6 text-base font-black leading-none text-white shadow-[0_22px_54px_rgba(255,79,109,0.28)] transition hover:translate-y-[-2px] hover:shadow-[0_28px_72px_rgba(255,92,122,0.36)]"
               >
-                Launch verified token
-                <ArrowRight size={18} className="transition group-hover:translate-x-1" />
+                <span className="leading-none">Launch verified token</span>
+                <ArrowRight size={18} className="shrink-0 transition group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/token"
@@ -325,8 +325,8 @@ export function LandingPage() {
             SignalCred makes the difference visible: a token moves from scattered, unverifiable signals into one public passport traders and creators can share.
           </p>
         </div>
-        <div className="mt-10 grid gap-5 lg:grid-cols-2">
-          <div className="landing-tilt-card landing-before-card rounded-[32px] border border-[#ff5c7a]/45 bg-[#230914]/88 p-6 shadow-[0_24px_90px_rgba(255,92,122,0.16)]">
+        <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          <div className="landing-tilt-card landing-before-card rounded-[32px] border border-[#ff5c7a]/45 bg-[#230914]/88 p-5 shadow-[0_24px_90px_rgba(255,92,122,0.16)]">
             <div className="flex items-center gap-3">
               <AlertTriangle className="text-[#ff8ba0]" />
               <div>
@@ -334,9 +334,9 @@ export function LandingPage() {
                 <p className="text-sm font-black text-white/42">One token, too many unknowns.</p>
               </div>
             </div>
-            <div className="mt-6 space-y-3">
+            <div className="mt-4 space-y-2.5">
               {beforeRows.map(([label, value, Icon]) => (
-                <div key={label} className="flex items-center justify-between rounded-2xl border border-[#ff5c7a]/22 bg-[#ff5c7a]/[0.07] px-4 py-4 shadow-[inset_0_0_32px_rgba(255,92,122,0.035)]">
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-[#ff5c7a]/22 bg-[#ff5c7a]/[0.07] px-4 py-3 shadow-[inset_0_0_32px_rgba(255,92,122,0.035)]">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
                     <p className="mt-1 text-base font-black text-[#ffd4dd]">{value}</p>
@@ -346,7 +346,7 @@ export function LandingPage() {
               ))}
             </div>
           </div>
-          <div className="landing-tilt-card landing-after-card rounded-[32px] border border-[#31d99b]/50 bg-[#061f18]/88 p-6 shadow-[0_24px_90px_rgba(49,217,155,0.14)]">
+          <div className="landing-tilt-card landing-after-card rounded-[32px] border border-[#31d99b]/50 bg-[#061f18]/88 p-5 shadow-[0_24px_90px_rgba(49,217,155,0.14)]">
             <div className="flex items-center gap-3">
               <ShieldCheck className="text-[#69f0bd]" />
               <div>
@@ -354,9 +354,9 @@ export function LandingPage() {
                 <p className="text-sm font-black text-white/42">A passport users can verify.</p>
               </div>
             </div>
-            <div className="mt-6 space-y-3">
+            <div className="mt-4 space-y-2.5">
               {afterRows.map(([label, value, Icon]) => (
-                <div key={label} className="flex items-center justify-between rounded-2xl border border-[#31d99b]/24 bg-[#31d99b]/[0.075] px-4 py-4 shadow-[inset_0_0_32px_rgba(49,217,155,0.04)]">
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-[#31d99b]/24 bg-[#31d99b]/[0.075] px-4 py-3 shadow-[inset_0_0_32px_rgba(49,217,155,0.04)]">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
                     <p className="mt-1 text-base font-black text-white">{value}</p>
@@ -452,8 +452,8 @@ export function LandingPage() {
                   <span className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-white/34">passport</span>
                   <span className="rounded-full bg-[#31d99b]/14 px-2 py-1 text-[10px] font-black text-[#69f0bd]">live</span>
                 </div>
-                <div className="mt-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#31d99b,#55d6ff,#a78bfa)] text-3xl font-black text-[#07070c]">
-                  S
+                <div className="mt-5 flex h-20 w-20 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[#0879ff] shadow-[0_18px_48px_rgba(0,119,255,0.28)]">
+                  <img src="/signalcred-logo-256.png" alt="SignalCred" className="h-full w-full object-cover" loading="lazy" />
                 </div>
                 <div className="mt-5 space-y-2">
                   {["source", "fees", "social"].map((item, index) => (
@@ -515,8 +515,9 @@ export function LandingPage() {
               SignalCred keeps the demo path tight: create through Bags, open the Trust Index, prove the fee loop, and publish token-linked social evidence.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link href="/launch" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-6 text-base font-black text-[#101524] transition hover:bg-[#d7fff0]">
-                Launch verified token <ArrowRight size={18} />
+              <Link href="/launch" className="inline-flex min-h-12 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-white px-6 text-base font-black leading-none text-[#101524] transition hover:bg-[#d7fff0]">
+                <span className="leading-none">Launch verified token</span>
+                <ArrowRight size={18} className="shrink-0" />
               </Link>
               <Link href="/token" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/18 px-6 text-base font-black text-white/78 transition hover:text-white">
                 Open Trust Index <ExternalLink size={16} />

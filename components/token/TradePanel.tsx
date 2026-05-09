@@ -90,7 +90,6 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
   const { connection } = useConnection();
   const { setVisible } = useWalletModal();
   const { push } = useToast();
-  const lastQuoteToastKey = useRef("");
 
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [currency, setCurrency] = useState<Currency>("SOL");
@@ -247,22 +246,15 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
         setError(message);
         setQuote(null);
         setStep("quote", "error", message);
-        push({ kind: "error", text: `Quote failed: ${message}` });
         return;
       }
       setQuote(data.quoteResponse);
       setStep("quote", "success", "Quote ready");
       setStep("route", "idle", "Server check runs before wallet opens");
-      const quoteToastKey = `${inputMint}:${outputMint}:${nativeAmount}:${side}:${currency}`;
-      if (lastQuoteToastKey.current !== quoteToastKey) {
-        lastQuoteToastKey.current = quoteToastKey;
-        push({ kind: "success", text: "Quote ready. Review route before signing." });
-      }
     } catch (e) {
       const mapped = classifyTradeError(e);
       setError(mapped.message);
       setStep("quote", "error", mapped.message);
-      push({ kind: "error", text: `Quote error (${mapped.type}): ${mapped.message}` });
       setQuote(null);
     } finally {
       setQuoteLoading(false);
