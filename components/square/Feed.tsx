@@ -65,9 +65,19 @@ type SquareToken = Token & {
   socialScore?: number;
 };
 
+type SquarePost = Post & {
+  authorUsername?: string | null;
+  authorAvatarUrl?: string | null;
+  tokenSymbol?: string | null;
+  tokenName?: string | null;
+  tokenImageUrl?: string | null;
+};
+
 type TokenMarket = {
   symbol: string;
   priceChange24hPercent: number | null;
+  imageUrl?: string | null;
+  name?: string | null;
 };
 
 type TokenProof = {
@@ -94,6 +104,62 @@ function avatarStyle(seed?: string | null) {
   return {
     background: `linear-gradient(135deg, hsl(${hue} 78% 58%), hsl(${(hue + 48) % 360} 72% 46%))`,
   };
+}
+
+function normalizeImageUrl(value?: string | null) {
+  const raw = value?.trim();
+  if (!raw) return null;
+  if (raw.startsWith("ipfs://")) return `https://ipfs.io/ipfs/${raw.slice("ipfs://".length)}`;
+  if (raw.startsWith("ar://")) return `https://arweave.net/${raw.slice("ar://".length)}`;
+  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:image/")) return raw;
+  return null;
+}
+
+function identiconDataUri(seed?: string | null, label = "SC") {
+  const value = seed || label || "SignalCred";
+  const hue = value.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % 360;
+  const letters = (label || value).replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || "SC";
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="hsl(${hue},82%,58%)"/>
+          <stop offset="1" stop-color="hsl(${(hue + 62) % 360},78%,42%)"/>
+        </linearGradient>
+        <filter id="s"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-opacity=".35"/></filter>
+      </defs>
+      <rect width="96" height="96" rx="30" fill="url(#g)"/>
+      <circle cx="72" cy="23" r="16" fill="rgba(255,255,255,.18)"/>
+      <path d="M14 66 C27 43, 44 82, 58 54 S80 40, 86 28" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="6" stroke-linecap="round"/>
+      <text x="48" y="57" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="900" fill="white" filter="url(#s)">${letters}</text>
+    </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function RoundImage({
+  src,
+  alt,
+  fallback,
+  seed,
+  className,
+}: {
+  src?: string | null;
+  alt: string;
+  fallback: string;
+  seed?: string | null;
+  className: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const image = !failed ? normalizeImageUrl(src) : null;
+  return (
+    <img
+      src={image ?? identiconDataUri(seed, fallback)}
+      alt={alt}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className={cn("shrink-0 object-cover", className)}
+    />
+  );
 }
 
 function typeTone(type: string) {
@@ -724,7 +790,7 @@ function PostCard({
   proof,
   linkedMint,
 }: {
-  post: Post;
+  post: SquarePost;
   wallet: string | null;
   symbolToMint: Map<string, string>;
   market?: TokenMarket;
@@ -745,12 +811,15 @@ function PostCard({
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [quoteText, setQuoteText] = useState("");
   const [quoteSubmitting, setQuoteSubmitting] = useState(false);
-  const [quotedPreview, setQuotedPreview] = useState<Post | null>(null);
+  const [quotedPreview, setQuotedPreview] = useState<SquarePost | null>(null);
   const [comments, setComments] = useState<{ id: string; authorWallet: string; content: string }[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const displayName = post.authorWallet ? shortWallet(post.authorWallet) : "anon";
+  const displayName = post.authorUsername || (post.authorWallet ? shortWallet(post.authorWallet) : "anon");
+  const tokenSymbol = market?.symbol || post.tokenSymbol || (linkedMint ? shortAddress(linkedMint) : "TOKEN");
+  const tokenName = market?.name || post.tokenName || "Bags token";
+  const tokenImage = post.tokenImageUrl || market?.imageUrl;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -994,10 +1063,15 @@ function PostCard({
       <div className="flex gap-3">
         <Link
           href={`/profile/${post.authorWallet}`}
-          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black text-white shadow-sm"
-          style={avatarStyle(post.authorWallet)}
+          className="mt-0.5 block h-10 w-10 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10"
         >
-          {displayName.slice(0, 2).toUpperCase()}
+          <RoundImage
+            src={post.authorAvatarUrl}
+            alt={`${displayName} avatar`}
+            fallback={displayName}
+            seed={post.authorWallet}
+            className="h-10 w-10 rounded-full"
+          />
         </Link>
         <div className="min-w-0 flex-1">
           <header className="mb-2 flex items-center gap-2">
@@ -1089,9 +1163,10 @@ function PostCard({
               <Link
                 href={`/token/${linkedMint}`}
                 className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200"
+                title={tokenName}
               >
-                <Hash size={13} />
-                Bags token {shortAddress(linkedMint)}
+                <RoundImage src={tokenImage} alt={`${tokenSymbol} logo`} fallback={tokenSymbol} seed={linkedMint} className="h-4 w-4 rounded-full" />
+                ${tokenSymbol} <span className="text-slate-400">{shortAddress(linkedMint)}</span>
               </Link>
               <ExplorerLink
                 href={solscanUrl(linkedMint, "token")}
@@ -1424,7 +1499,7 @@ function SquareTokenContext({ mint }: { mint: string }) {
 }
 
 function FeedSidebar() {
-  const [trending, setTrending] = useState<{ mint: string; symbol: string; name: string; socialScore: number }[]>([]);
+  const [trending, setTrending] = useState<{ mint: string; symbol: string; name: string; socialScore: number; imageUrl?: string | null }[]>([]);
 
   useEffect(() => {
     fetch("/api/trending/tokens")
@@ -1446,9 +1521,7 @@ function FeedSidebar() {
             {trending.map((token, index) => (
               <Link key={token.mint} href={`/token/${token.mint}`} className="flex items-center gap-3 rounded-xl p-2 hover:bg-white/7">
                 <span className="w-5 text-xs font-black text-white/35">{index + 1}</span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-black text-white" style={avatarStyle(token.mint)}>
-                  {token.symbol.slice(0, 1)}
-                </div>
+                <RoundImage src={token.imageUrl} alt={`${token.symbol} logo`} fallback={token.symbol} seed={token.mint} className="h-8 w-8 rounded-full" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-white">${token.symbol}</p>
                   <p className="truncate text-xs font-semibold text-white/35">{token.name}</p>
@@ -1491,7 +1564,7 @@ function isMint(value: string | null | undefined) {
 export function Feed({ initialTokenMint = null }: { initialTokenMint?: string | null }) {
   const { publicKey } = useWallet();
   const [tab, setTab] = useState<Tab>("for-you");
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<SquarePost[]>([]);
   const [tokens, setTokens] = useState<SquareToken[]>([]);
   const [tokenMarkets, setTokenMarkets] = useState<Record<string, TokenMarket>>({});
   const [tokenProofs, setTokenProofs] = useState<Record<string, TokenProof>>({});
@@ -1566,6 +1639,8 @@ export function Feed({ initialTokenMint = null }: { initialTokenMint?: string | 
               typeof data.marketData?.priceChange24hPercent === "number"
                 ? data.marketData.priceChange24hPercent
                 : null,
+            imageUrl: data.token?.imageUrl || data.marketData?.logoURI || null,
+            name: data.marketData?.name || data.token?.name || null,
           } satisfies TokenMarket,
         };
       })
@@ -1647,7 +1722,7 @@ export function Feed({ initialTokenMint = null }: { initialTokenMint?: string | 
       const res = await fetch(url, { headers: tab === "following" && wallet ? { "x-wallet": wallet } : undefined }).catch(() => null);
       if (!res) return;
       const data = await res.json();
-      const fresh: Post[] = data.posts ?? [];
+      const fresh: SquarePost[] = data.posts ?? [];
       if (fresh.length > posts.length) setNewPostCount(fresh.length - posts.length);
     }, 18000);
     return () => clearInterval(interval);

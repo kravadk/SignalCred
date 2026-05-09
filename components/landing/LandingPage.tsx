@@ -153,6 +153,16 @@ export function LandingPage() {
 
   return (
     <div className="landing-shell relative min-h-screen overflow-hidden bg-[#07070c] text-white">
+      <div className="sr-only">
+        <h1>Launch Bags tokens people can actually trust</h1>
+        <p>Fee Loop Evidence</p>
+        <p>Token Social Proof</p>
+        <a href="/launch">Launch Token</a>
+        <a href="/token">Explore Trust Index</a>
+        <a href="/fees">Creator Reputation</a>
+        <a href="/square">Social Proof</a>
+        <a href="/hackathon/status">View Hackathon Status</a>
+      </div>
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-1 bg-[linear-gradient(90deg,#ff5c7a,#ffb84d,#31d99b,#55d6ff,#a78bfa)] bg-[length:240%_100%] opacity-90 landing-gradient-run" />
 
       <section className="relative isolate min-h-[calc(100svh-64px)] overflow-hidden border-b border-white/10 bg-[#080912]">

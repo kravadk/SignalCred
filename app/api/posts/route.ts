@@ -143,8 +143,38 @@ export async function GET(req: NextRequest) {
       .limit(limit);
   }
 
+  const authorWallets = Array.from(new Set(rows.map((post) => post.authorWallet).filter((wallet): wallet is string => Boolean(wallet))));
+  const tokenMints = Array.from(new Set(rows.map((post) => post.tokenMint).filter((mint): mint is string => Boolean(mint))));
+  const [authorRows, tokenRows] = await Promise.all([
+    authorWallets.length
+      ? db
+          .select({ wallet: users.wallet, username: users.username, avatarUrl: users.avatarUrl })
+          .from(users)
+          .where(inArray(users.wallet, authorWallets))
+      : Promise.resolve([]),
+    tokenMints.length
+      ? db
+          .select({ mint: tokens.mint, name: tokens.name, symbol: tokens.symbol, imageUrl: tokens.imageUrl })
+          .from(tokens)
+          .where(inArray(tokens.mint, tokenMints))
+      : Promise.resolve([]),
+  ]);
+  const authorMap = new Map(authorRows.map((user) => [user.wallet, user]));
+  const tokenMap = new Map(tokenRows.map((token) => [token.mint, token]));
+
   return NextResponse.json({
-    posts: rows,
+    posts: rows.map((post) => {
+      const author = post.authorWallet ? authorMap.get(post.authorWallet) : null;
+      const token = post.tokenMint ? tokenMap.get(post.tokenMint) : null;
+      return {
+        ...post,
+        authorUsername: author?.username ?? null,
+        authorAvatarUrl: author?.avatarUrl ?? null,
+        tokenSymbol: token?.symbol ?? null,
+        tokenName: token?.name ?? null,
+        tokenImageUrl: token?.imageUrl ?? null,
+      };
+    }),
     tokenLinkedOnly: true,
     rankingSource,
     filter: { tokenMint: tokenMint ?? null, search: search || null },

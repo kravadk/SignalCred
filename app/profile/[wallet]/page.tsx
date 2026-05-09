@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, BadgeCheck, ExternalLink, Gift, Loader2, ReceiptText, ShieldAlert } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ChevronDown, ExternalLink, Gift, Loader2, ReceiptText, ShieldAlert, WalletCards } from "lucide-react";
 import { formatLamports, shortWallet } from "@/lib/utils";
 import { feeVelocitySubtitle, feeVelocityValue } from "@/lib/fee-velocity-display";
 import { ExplorerLink, shortAddress, solscanUrl } from "@/components/ui/ExplorerLink";
@@ -84,11 +84,36 @@ function riskClass(severity: RiskFlag["severity"]) {
   return "border-white/10 bg-white/6 text-white/45";
 }
 
+function normalizeImageUrl(value?: string | null) {
+  const raw = value?.trim();
+  if (!raw) return null;
+  if (raw.startsWith("ipfs://")) return `https://ipfs.io/ipfs/${raw.slice("ipfs://".length)}`;
+  if (raw.startsWith("ar://")) return `https://arweave.net/${raw.slice("ar://".length)}`;
+  if (/^https?:\/\//i.test(raw) || raw.startsWith("data:image/")) return raw;
+  return null;
+}
+
+function TokenAvatar({ src, symbol }: { src?: string | null; symbol: string }) {
+  const [failed, setFailed] = useState(false);
+  const image = failed ? null : normalizeImageUrl(src);
+  return (
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#7a55c6] to-[#ff6a84] text-xs font-black text-white">
+      {image ? (
+        <img src={image} alt={`${symbol} logo`} className="h-full w-full object-cover" loading="lazy" onError={() => setFailed(true)} />
+      ) : (
+        symbol.slice(0, 2).toUpperCase()
+      )}
+    </div>
+  );
+}
+
 export default function CreatorProfilePage({ params }: { params: { wallet: string } }) {
   const [data, setData] = useState<CreatorReputation | null>(null);
   const [feeLoops, setFeeLoops] = useState<CompactFeeLoop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [graphOpen, setGraphOpen] = useState(false);
+  const [treasuryOpen, setTreasuryOpen] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,7 +186,7 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
         <ArrowLeft size={15} /> Reputation hub
       </Link>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_300px]">
         <section className="card p-4">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -205,8 +230,44 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
           </div>
         </section>
 
-        <CreatorTreasuryPanel wallet={data.creator.wallet} />
+        <aside className="card p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-[#50d8a4]">creator finance</p>
+              <h2 className="mt-1 font-mono text-base font-black text-white">USDT Treasury</h2>
+            </div>
+            <WalletCards size={18} className="text-[#50d8a4]" />
+          </div>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between rounded-lg bg-white/[0.045] px-3 py-2">
+              <span className="text-white/42">Planned campaigns</span>
+              <span className="font-mono text-[#50d8a4]">{usd(data.campaignTotals?.plannedBudgetUsdt ?? 0)}</span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg bg-white/[0.045] px-3 py-2">
+              <span className="text-white/42">Claimable estimate</span>
+              <span className="font-mono text-white">{formatLamports(data.treasuryPlanner.claimableEstimateLamports)}</span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg bg-white/[0.045] px-3 py-2">
+              <span className="text-white/42">Mode</span>
+              <span className="font-mono text-[#ffcc7a]">preview only</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setTreasuryOpen((value) => !value)}
+            className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-white/8 bg-white/[0.04] text-xs font-bold text-white/70 hover:bg-white/[0.07]"
+          >
+            {treasuryOpen ? "Hide planner" : "Open planner"}
+            <ChevronDown size={14} className={treasuryOpen ? "rotate-180 transition" : "transition"} />
+          </button>
+        </aside>
       </div>
+
+      {treasuryOpen && (
+        <div className="mb-3">
+          <CreatorTreasuryPanel wallet={data.creator.wallet} />
+        </div>
+      )}
 
       <section className="card mb-4 p-4">
         <div className="mb-4 flex items-start justify-between gap-3">
@@ -242,9 +303,12 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
               return (
                 <Link key={token.mint} href={`/token/${token.mint}`} className="rounded-2xl border border-white/8 bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.07]">
                   <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-fun font-black text-white">{token.name}</p>
-                      <p className="truncate text-xs font-mono text-white/35">{token.symbol} - {shortAddress(token.mint)}</p>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <TokenAvatar src={token.imageUrl} symbol={token.symbol} />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-fun font-black text-white">{token.name}</p>
+                        <p className="truncate text-xs font-mono text-white/35">{token.symbol} - {shortAddress(token.mint)}</p>
+                      </div>
                     </div>
                     <ExternalLink size={14} className="shrink-0 text-white/25" />
                   </div>
@@ -275,10 +339,24 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
         )}
       </section>
 
-      <div className="mb-4">
-        <p className="section-kicker mb-2">Creator Reliability Score</p>
-        <CreatorTrustGraph wallet={data.creator.wallet} />
-      </div>
+      <section className="card mb-3 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setGraphOpen((value) => !value)}
+          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-white/[0.035]"
+        >
+          <span>
+            <span className="block font-mono text-base font-black text-white">Creator Trust Graph</span>
+            <span className="mt-1 block text-xs font-body text-white/38">Open creator history, linked wallets, suspicious patterns, and score breakdown.</span>
+          </span>
+          <ChevronDown size={16} className={graphOpen ? "rotate-180 text-white/60 transition" : "text-white/35 transition"} />
+        </button>
+        {graphOpen && (
+          <div className="border-t border-white/6 p-4">
+            <CreatorTrustGraph wallet={data.creator.wallet} />
+          </div>
+        )}
+      </section>
 
       <section className="card mb-4 p-4">
         <div className="mb-4 flex items-start justify-between gap-3">
@@ -330,9 +408,7 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
         ) : data.tokens.map((token) => (
           <Link key={token.mint} href={`/token/${token.mint}`} className="grid grid-cols-1 gap-3 border-b border-white/5 px-5 py-4 transition-colors hover:bg-white/5 md:grid-cols-12 md:items-center">
             <div className="md:col-span-4 flex min-w-0 items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#7a55c6] to-[#ff6a84] text-white">
-                {token.imageUrl ? <img src={token.imageUrl} alt={token.symbol} className="h-full w-full object-cover" /> : token.symbol[0]}
-              </div>
+              <TokenAvatar src={token.imageUrl} symbol={token.symbol} />
               <div className="min-w-0">
                 <p className="truncate font-fun font-black text-white">{token.name}</p>
                 <p className="truncate text-xs font-mono text-white/35">{token.symbol} - {shortAddress(token.mint)}</p>
