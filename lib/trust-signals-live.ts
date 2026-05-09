@@ -194,7 +194,7 @@ export async function getTrustSignalsLive(limit = 24) {
       candidate.source === "bags_feed" ? "New Bags launch indexed" : "Indexed Bags token refreshed",
       "Launch source is present in the Bags feed or indexed token cache. This is a discovery event, not a trading signal.",
       candidate.source,
-      `https://bags.fm/token/${candidate.mint}`
+      `https://bags.fm/${candidate.mint}`
     ));
 
     if (poolVerified) {
@@ -205,7 +205,7 @@ export async function getTrustSignalsLive(limit = 24) {
         "Pool proof verified",
         "Bags pool proof is available from migrated pool data or indexed Bags metadata.",
         "bags_pools",
-        `https://bags.fm/token/${candidate.mint}`
+        `https://bags.fm/${candidate.mint}`
       ));
     } else {
       rows.push(trustSignal(
@@ -227,7 +227,7 @@ export async function getTrustSignalsLive(limit = 24) {
         "Creator context found",
         "Creator or admin context exists through Bags creators API or the local indexed creator wallet.",
         creators.length > 0 ? "bags_creators_api" : "indexed_creator_wallet",
-        candidate.creatorWallet ? `https://solscan.io/account/${candidate.creatorWallet}` : `https://bags.fm/token/${candidate.mint}`
+        candidate.creatorWallet ? `https://solscan.io/account/${candidate.creatorWallet}` : `https://bags.fm/${candidate.mint}`
       ));
     }
 

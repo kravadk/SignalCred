@@ -61,7 +61,7 @@ function CompactTokenInfo({ token, mint }: { token: Token | null; mint: string }
           <p className="text-xs font-body font-semibold text-white/42">Official sources for the token context.</p>
         </div>
         <a
-          href={`https://bags.fm/token/${mint}`}
+          href={`https://bags.fm/${mint}`}
           target="_blank"
           rel="noreferrer"
           className="inline-flex min-h-[34px] items-center gap-1.5 rounded-xl border border-[#00ff88]/20 bg-[#00ff88]/10 px-3 text-xs font-body font-black text-[#00ff88] hover:bg-[#00ff88]/14"
@@ -155,7 +155,7 @@ export default async function TokenPage({ params }: { params: { mint: string } }
           <ExternalLink size={13} />
         </a>
         <a
-          href={`https://bags.fm/token/${params.mint}`}
+          href={`https://bags.fm/${params.mint}`}
           target="_blank"
           rel="noreferrer"
           className="inline-flex min-h-[34px] items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-mono font-bold text-white/62 transition-colors hover:text-white"

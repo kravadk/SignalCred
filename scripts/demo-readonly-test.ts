@@ -217,7 +217,7 @@ async function run() {
     return (
       res.status === 200 &&
       body.includes("solscan.io/token/") &&
-      body.includes("bags.fm/token/") &&
+      body.includes("bags.fm/") &&
       body.includes("Buy / Sell") &&
       body.includes("Trust Profile") &&
       body.includes("Trust Passport") &&
@@ -280,7 +280,7 @@ async function run() {
     const rows = asArray(body.rows).filter(isRecord);
     if (rows.length < 9) return false;
     const hrefs = rows.map((row) => row.href).filter((href): href is string => typeof href === "string");
-    const required = hrefs.some((href) => href.includes("bags.fm/token/"));
+    const required = hrefs.some((href) => href.includes("bags.fm/"));
     const marketOk = selectedHasMarket ? hrefs.some((href) => href.includes("dexscreener.com/")) : true;
     const normalized = rows.every((row) => (
       typeof row.id === "string" &&

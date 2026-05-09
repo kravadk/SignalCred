@@ -130,14 +130,14 @@ export async function buildTokenSocialContext(mint: string) {
   const hasCampaign = campaigns.length > 0;
 
   const milestones = [
-    milestone("bags-feed", "Bags feed verified", bagsFeedVerified, bagsFeedVerified ? "verified" : "pending", "bags_feed", `https://bags.fm/token/${mint}`),
+    milestone("bags-feed", "Bags feed verified", bagsFeedVerified, bagsFeedVerified ? "verified" : "pending", "bags_feed", `https://bags.fm/${mint}`),
     milestone("pool-proof", "Pool verified", poolVerified, poolKey ? `${String(poolKey).slice(0, 6)}...${String(poolKey).slice(-4)}` : "pending", "bags_pool", poolKey ? `https://solscan.io/account/${poolKey}` : null),
     milestone("creator-proof", "Creator verified", creatorVerified, creator?.wallet ? `${creator.wallet.slice(0, 4)}...${creator.wallet.slice(-4)}` : "pending", "creators_api", creator?.wallet ? `https://solscan.io/account/${creator.wallet}` : null),
     milestone("official-update", "First official update", hasOfficialUpdate, hasOfficialUpdate ? `${officialPosts.length} official` : "pending", "square_posts", null, officialPosts[0]?.createdAt?.toISOString?.() ?? String(officialPosts[0]?.createdAt ?? "")),
     milestone("holders-10", "First 10 holder sample", hasTenHolders, holderSampleCount == null ? "holder source pending" : `${holderSampleCount} largest accounts`, "solana_rpc", `https://solscan.io/token/${mint}`),
-    milestone("fees-1-sol", "First 1 SOL fees", hasOneSolFees, `${(safeLifetimeFeesLamports / 1e9).toFixed(4)} SOL`, "bags_fees", `https://bags.fm/token/${mint}`),
-    milestone("velocity-active", "Fee velocity active", feeVelocityActive, feeVelocityValue(feeVelocity?.status, feeVelocity?.feeVelocity24hLamports), "fee_snapshots", `https://bags.fm/token/${mint}`),
-    milestone("claim-event", "First claim event", hasClaimEvent, hasClaimEvent ? `${claimEvents24h.length} in 24h` : "pending", "claim_events", claimEvents24h[0]?.signature ? `https://solscan.io/tx/${claimEvents24h[0].signature}` : `https://bags.fm/token/${mint}`),
+    milestone("fees-1-sol", "First 1 SOL fees", hasOneSolFees, `${(safeLifetimeFeesLamports / 1e9).toFixed(4)} SOL`, "bags_fees", `https://bags.fm/${mint}`),
+    milestone("velocity-active", "Fee velocity active", feeVelocityActive, feeVelocityValue(feeVelocity?.status, feeVelocity?.feeVelocity24hLamports), "fee_snapshots", `https://bags.fm/${mint}`),
+    milestone("claim-event", "First claim event", hasClaimEvent, hasClaimEvent ? `${claimEvents24h.length} in 24h` : "pending", "claim_events", claimEvents24h[0]?.signature ? `https://solscan.io/tx/${claimEvents24h[0].signature}` : `https://bags.fm/${mint}`),
     milestone("usdt-campaign", "USDT campaign planned", hasCampaign, hasCampaign ? `${campaigns.length} planned` : "pending", "reward_campaigns", null, campaigns[0]?.createdAt?.toISOString?.() ?? String(campaigns[0]?.createdAt ?? "")),
   ];
 

@@ -109,7 +109,7 @@ export async function GET(req: NextRequest, { params }: { params: { mint: string
       "Bags fees generated",
       `${(lifetimeFeesLamports / 1e9).toFixed(4)} SOL lifetime fees indexed.`,
       "bags_lifetime_fees",
-      `https://bags.fm/token/${params.mint}`,
+      `https://bags.fm/${params.mint}`,
       new Date().toISOString(),
       18
     ) : event(
@@ -119,7 +119,7 @@ export async function GET(req: NextRequest, { params }: { params: { mint: string
       "Fees not indexed yet",
       "Bags lifetime fee proof is still pending. Score does not fake this value.",
       "bags_lifetime_fees",
-      `https://bags.fm/token/${params.mint}`,
+      `https://bags.fm/${params.mint}`,
       null,
       0
     ),
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest, { params }: { params: { mint: string
       "Bags claim event",
       `${claim.wallet ? `${claim.wallet.slice(0, 4)}...${claim.wallet.slice(-4)}` : "wallet"} claimed ${safeLamports(claim.amount) / 1e9} SOL.`,
       "bags_claim_events",
-      claim.signature ? `https://solscan.io/tx/${claim.signature}` : `https://bags.fm/token/${params.mint}`,
+      claim.signature ? `https://solscan.io/tx/${claim.signature}` : `https://bags.fm/${params.mint}`,
       claim.timestamp ?? null,
       10
     )),

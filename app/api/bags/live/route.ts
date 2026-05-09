@@ -30,7 +30,7 @@ async function getLiveSnapshot(limit: number) {
     status: item.status ?? "live",
     launchSignature: item.launchSignature ?? null,
     poolVerified: item.tokenMint ? poolMints.has(item.tokenMint) : false,
-    bagsTokenUrl: item.tokenMint ? `https://bags.fm/token/${item.tokenMint}` : null,
+    bagsTokenUrl: item.tokenMint ? `https://bags.fm/${item.tokenMint}` : null,
     source: "bags_feed",
   })).filter((item) => item.mint);
 

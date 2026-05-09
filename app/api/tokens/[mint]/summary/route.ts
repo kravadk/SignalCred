@@ -243,7 +243,7 @@ export async function GET(_req: NextRequest, { params }: { params: { mint: strin
     },
     links: {
       solscanMint: `https://solscan.io/token/${params.mint}`,
-      bagsToken: `https://bags.fm/token/${params.mint}`,
+      bagsToken: `https://bags.fm/${params.mint}`,
       dexScreener: marketData?.pairAddress ? `https://dexscreener.com/solana/${marketData.pairAddress}` : null,
       pool: poolKey ? `https://solscan.io/account/${poolKey}` : null,
       creator: creator?.wallet ? `https://solscan.io/account/${creator.wallet}` : null,

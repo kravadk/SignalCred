@@ -191,7 +191,7 @@ export async function buildTokenPassport(mint: string): Promise<TokenPassportRes
   const dexScreener = market?.pairAddress ? `https://dexscreener.com/solana/${market.pairAddress}` : null;
   const meteora = pool?.dammV2PoolKey ? `https://app.meteora.ag/pools/${pool.dammV2PoolKey}` : null;
   const solscanMint = `https://solscan.io/token/${mint}`;
-  const bagsUrl = `https://bags.fm/token/${mint}`;
+  const bagsUrl = `https://bags.fm/${mint}`;
 
   const evidenceRows = [
     evidence({

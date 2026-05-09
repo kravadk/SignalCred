@@ -13,7 +13,7 @@ export function dexScreenerPairUrl(pairAddress: string) {
 }
 
 export function bagsTokenUrl(mint: string) {
-  return `https://bags.fm/token/${mint}`;
+  return `https://bags.fm/${mint}`;
 }
 
 export function shortAddress(value: string) {
