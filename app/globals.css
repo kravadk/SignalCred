@@ -253,9 +253,10 @@ tfoot {
 
 .landing-aurora {
   background:
-    linear-gradient(115deg, rgba(255,255,255,0.72) 0%, transparent 34%),
-    linear-gradient(145deg, transparent 12%, rgba(49,217,155,0.22) 42%, rgba(85,214,255,0.2) 68%, transparent 88%),
-    repeating-linear-gradient(115deg, rgba(16,21,36,0.05) 0 1px, transparent 1px 18px);
+    radial-gradient(circle at 18% 18%, rgba(255,92,122,0.18), transparent 34%),
+    radial-gradient(circle at 76% 34%, rgba(49,217,155,0.2), transparent 38%),
+    linear-gradient(145deg, transparent 12%, rgba(49,217,155,0.1) 42%, rgba(85,214,255,0.12) 68%, transparent 88%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 18px);
   animation: landing-aurora-drift 12s ease-in-out infinite;
 }
 

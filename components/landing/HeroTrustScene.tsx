@@ -103,13 +103,13 @@ export function HeroTrustScene() {
       return line;
     });
 
-    const grid = new THREE.GridHelper(9, 24, "#20d99a", "#bdd8ee");
+    const grid = new THREE.GridHelper(9, 24, "#20d99a", "#27344f");
     grid.position.y = -2.05;
     grid.material.opacity = 0.26;
     grid.material.transparent = true;
     scene.add(grid);
 
-    const ambient = new THREE.AmbientLight("#ffffff", 1.65);
+    const ambient = new THREE.AmbientLight("#8fb6ff", 1.15);
     const key = new THREE.PointLight("#ff8a55", 13, 16);
     key.position.set(1.6, 2.4, 3.5);
     const rim = new THREE.PointLight("#20d99a", 7, 12);
@@ -193,7 +193,7 @@ export function HeroTrustScene() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 overflow-hidden opacity-95"
     >
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.5),transparent_36%,rgba(85,214,255,0.15)_68%,rgba(255,92,122,0.12))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_28%,rgba(49,217,155,0.16),transparent_32%),linear-gradient(120deg,rgba(8,9,18,0.18),transparent_38%,rgba(85,214,255,0.12)_68%,rgba(255,92,122,0.1))]" />
     </div>
   );
 }

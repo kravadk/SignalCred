@@ -132,52 +132,52 @@ export function LandingPage() {
   const marqueeItems = useMemo(() => [...sources, ...sources], []);
 
   return (
-    <div className="landing-shell relative min-h-screen overflow-hidden bg-[#f5fbff] text-[#111827]">
+    <div className="landing-shell relative min-h-screen overflow-hidden bg-[#07070c] text-white">
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-1 bg-[linear-gradient(90deg,#ff5c7a,#ffb84d,#31d99b,#55d6ff,#a78bfa)] bg-[length:240%_100%] opacity-90 landing-gradient-run" />
 
-      <section className="relative isolate min-h-[calc(100svh-64px)] overflow-hidden border-b border-[#15213a]/10 bg-[#eaf7ff]">
+      <section className="relative isolate min-h-[calc(100svh-64px)] overflow-hidden border-b border-white/10 bg-[#080912]">
         <HeroTrustScene />
         <div className="absolute inset-0 pointer-events-none landing-aurora" />
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.42]"
+          className="absolute inset-0 pointer-events-none opacity-[0.36]"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(17,24,39,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(17,24,39,0.045) 1px, transparent 1px)",
+              "linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)",
             backgroundSize: "42px 42px",
             maskImage: "linear-gradient(to bottom, black 0%, black 68%, transparent 100%)",
           }}
         />
-        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#f5fbff] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#07070c] to-transparent" />
 
         <div className="relative z-10 mx-auto grid min-h-[calc(100svh-64px)] max-w-[1480px] items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.94fr_1.06fr] lg:px-10">
           <div className="landing-rise max-w-5xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#31d99b]/35 bg-white/72 px-4 py-2 text-sm font-black text-[#07634b] shadow-[0_14px_50px_rgba(49,217,155,0.22)] backdrop-blur-xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#31d99b]/35 bg-[#0d1c19]/82 px-4 py-2 text-sm font-black text-[#69f0bd] shadow-[0_14px_50px_rgba(49,217,155,0.18)] backdrop-blur-xl">
               <Sparkles size={16} />
               SignalCred Trust Observatory
             </div>
-            <h1 className="max-w-5xl font-display text-5xl leading-[0.92] tracking-normal text-[#101524] sm:text-7xl lg:text-8xl">
+            <h1 className="max-w-5xl font-display text-5xl leading-[0.92] tracking-normal text-white sm:text-7xl lg:text-8xl">
               Launch Bags tokens people can actually trust
             </h1>
-            <p className="mt-7 max-w-3xl text-lg font-black leading-8 text-[#39445c] sm:text-xl">
+            <p className="mt-7 max-w-3xl text-lg font-black leading-8 text-white/66 sm:text-xl">
               Create a Bags-native token, publish verified creator updates, prove fees and claims, and turn community activity into token reputation.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/launch"
-                className="group landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#101524] px-6 text-base font-black text-white shadow-[0_22px_54px_rgba(16,21,36,0.28)] transition hover:translate-y-[-2px] hover:shadow-[0_28px_72px_rgba(255,92,122,0.36)]"
+                className="group landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#ff4f6d,#ff8b45)] px-6 text-base font-black text-white shadow-[0_22px_54px_rgba(255,79,109,0.28)] transition hover:translate-y-[-2px] hover:shadow-[0_28px_72px_rgba(255,92,122,0.36)]"
               >
                 Launch Token
                 <ArrowRight size={18} className="transition group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/token"
-                className="landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-[#101524]/12 bg-white/78 px-6 text-base font-black text-[#101524] shadow-[0_16px_44px_rgba(49,217,155,0.16)] backdrop-blur-xl transition hover:border-[#31d99b]/50 hover:bg-white"
+                className="landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-6 text-base font-black text-white shadow-[0_16px_44px_rgba(49,217,155,0.12)] backdrop-blur-xl transition hover:border-[#31d99b]/50 hover:bg-white/[0.12]"
               >
                 Explore Trust Index
               </Link>
               <Link
                 href="/hackathon/status"
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-[#101524]/10 bg-white/44 px-6 text-base font-black text-[#4c5870] backdrop-blur-xl transition hover:text-[#101524]"
+                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-6 text-base font-black text-white/58 backdrop-blur-xl transition hover:text-white"
               >
                 View Hackathon Status
               </Link>
@@ -187,7 +187,7 @@ export function LandingPage() {
               {proofNodes.map((node, index) => (
                 <div
                   key={node}
-                  className="landing-proof-chip rounded-2xl border border-white/70 bg-white/74 px-3 py-3 text-sm font-black text-[#172033] shadow-[0_16px_38px_rgba(19,33,58,0.12)] backdrop-blur-xl"
+                  className="landing-proof-chip rounded-2xl border border-white/10 bg-white/[0.07] px-3 py-3 text-sm font-black text-white/82 shadow-[0_16px_38px_rgba(0,0,0,0.22)] backdrop-blur-xl"
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
                   <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#31d99b] shadow-[0_0_14px_rgba(49,217,155,0.9)]" />
@@ -198,25 +198,25 @@ export function LandingPage() {
           </div>
 
           <div className="relative hidden min-h-[600px] lg:block">
-            <div className="landing-float-panel absolute right-4 top-12 w-80 rounded-[28px] border border-white/70 bg-white/72 p-5 shadow-[0_28px_90px_rgba(33,51,89,0.18)] backdrop-blur-2xl">
+            <div className="landing-float-panel absolute right-4 top-12 w-80 rounded-[28px] border border-white/10 bg-[#101524]/78 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-[#667085]">Live proof rail</p>
-                <span className="rounded-full bg-[#31d99b]/14 px-3 py-1 text-xs font-black text-[#087353]">no fake data</span>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Live proof rail</p>
+                <span className="rounded-full bg-[#31d99b]/14 px-3 py-1 text-xs font-black text-[#69f0bd]">no fake data</span>
               </div>
               <div className="mt-5 space-y-3">
                 {signalRows.map(([label, value, status]) => (
-                  <div key={label} className="flex items-center justify-between rounded-2xl border border-[#101524]/8 bg-[#f7fbff] px-4 py-3">
+                  <div key={label} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[#98a2b3]">{label}</p>
-                      <p className="mt-1 text-sm font-black text-[#111827]">{value}</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
+                      <p className="mt-1 text-sm font-black text-white">{value}</p>
                     </div>
                     <span
                       className={`rounded-full px-2.5 py-1 text-xs font-black ${
                         status === "ok"
-                          ? "bg-[#31d99b]/14 text-[#087353]"
+                          ? "bg-[#31d99b]/14 text-[#69f0bd]"
                           : status === "warming"
-                            ? "bg-[#ffb84d]/18 text-[#8a5700]"
-                            : "bg-[#8b5cf6]/12 text-[#5b31b8]"
+                            ? "bg-[#ffb84d]/18 text-[#ffcf7a]"
+                            : "bg-[#8b5cf6]/16 text-[#c4b5fd]"
                       }`}
                     >
                       {status}
@@ -225,7 +225,7 @@ export function LandingPage() {
                 ))}
               </div>
             </div>
-            <div className="landing-float-panel landing-float-delay absolute bottom-16 left-4 w-72 rounded-[28px] border border-[#101524]/10 bg-[#101524] p-5 text-white shadow-[0_28px_90px_rgba(16,21,36,0.32)]">
+            <div className="landing-float-panel landing-float-delay absolute bottom-16 left-4 w-72 rounded-[28px] border border-white/10 bg-[#0b0a12]/86 p-5 text-white shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-xl">
               <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Fee loop</p>
               <p className="mt-3 text-3xl font-black">Generated to claimed to proof</p>
               <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
@@ -236,14 +236,14 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden border-b border-[#15213a]/10 bg-white py-4">
+      <section className="overflow-hidden border-b border-white/10 bg-[#090a12] py-4">
         <div className="landing-marquee flex gap-3 whitespace-nowrap">
           {marqueeItems.map(([label, detail], index) => (
-            <div key={`${label}-${index}`} className="mx-2 inline-flex min-w-56 items-center gap-3 rounded-2xl border border-[#101524]/8 bg-[#f4f8ff] px-5 py-4 shadow-[0_10px_30px_rgba(19,33,58,0.06)]">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#101524] text-xs font-black text-white">{index % 6 + 1}</span>
+            <div key={`${label}-${index}`} className="mx-2 inline-flex min-w-56 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.045] px-5 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-xs font-black text-white">{index % 6 + 1}</span>
               <span>
-                <span className="block text-sm font-black text-[#111827]">{label}</span>
-                <span className="block text-xs font-black text-[#667085]">{detail}</span>
+                <span className="block text-sm font-black text-white">{label}</span>
+                <span className="block text-xs font-black text-white/44">{detail}</span>
               </span>
             </div>
           ))}
@@ -253,12 +253,12 @@ export function LandingPage() {
       <section className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
         <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#0f8f67]">Product system</p>
-            <h2 className="mt-4 font-display text-4xl leading-tight text-[#101524] sm:text-6xl">
+            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#69f0bd]">Product system</p>
+            <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">
               A launchpad is not enough. Trust has to ship with the token.
             </h2>
           </div>
-          <p className="max-w-3xl text-lg font-black leading-8 text-[#516078]">
+          <p className="max-w-3xl text-lg font-black leading-8 text-white/60">
             The first screen should feel alive because the product is alive: source checks, token proof, fee snapshots, creator identity, and social context all move together.
           </p>
         </div>
@@ -267,16 +267,16 @@ export function LandingPage() {
             <Link
               href={href}
               key={title}
-              className="landing-tilt-card group relative min-h-80 overflow-hidden rounded-[30px] border border-[#101524]/10 bg-white p-6 shadow-[0_24px_70px_rgba(19,33,58,0.10)] transition duration-300 hover:-translate-y-2"
+              className="landing-tilt-card group relative min-h-80 overflow-hidden rounded-[30px] border border-white/10 bg-[#101524]/68 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-2 hover:border-white/18"
               style={{ animationDelay: `${index * 90}ms` }}
             >
               <div className={`absolute inset-x-0 top-0 h-2 bg-gradient-to-r ${tone}`} />
               <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${tone} text-white shadow-[0_18px_36px_rgba(19,33,58,0.16)]`}>
                 <Icon size={24} />
               </div>
-              <h3 className="mt-9 text-2xl font-black text-[#101524]">{title}</h3>
-              <p className="mt-4 text-base font-black leading-7 text-[#5b667a]">{body}</p>
-              <div className="absolute bottom-6 left-6 inline-flex items-center gap-2 text-sm font-black text-[#101524]">
+              <h3 className="mt-9 text-2xl font-black text-white">{title}</h3>
+              <p className="mt-4 text-base font-black leading-7 text-white/56">{body}</p>
+              <div className="absolute bottom-6 left-6 inline-flex items-center gap-2 text-sm font-black text-white/80">
                 Open layer <ArrowRight size={16} className="transition group-hover:translate-x-1" />
               </div>
             </Link>
@@ -284,7 +284,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-y border-[#15213a]/10 bg-[#101524] text-white">
+      <section className="relative overflow-hidden border-y border-white/10 bg-[#101524] text-white">
         <div className="absolute inset-0 landing-dark-grid opacity-60" />
         <div className="mx-auto grid max-w-[1480px] gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:px-10">
           <div className="relative z-10">
@@ -313,7 +313,7 @@ export function LandingPage() {
             </div>
           </div>
           <div className="relative z-10 rounded-[34px] border border-white/12 bg-white/[0.08] p-4 shadow-[0_34px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-            <div className="relative overflow-hidden rounded-[26px] border border-white/12 bg-[#f8fbff] p-6 text-[#101524]">
+            <div className="relative overflow-hidden rounded-[26px] border border-white/12 bg-[#0b0d18] p-6 text-white">
               <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#ff5c7a,#ffb84d,#31d99b,#55d6ff,#a78bfa)] landing-gradient-run" />
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -321,22 +321,22 @@ export function LandingPage() {
                     <PreviewIcon size={23} />
                   </div>
                   <div>
-                    <p className="text-sm font-black uppercase tracking-[0.2em] text-[#98a2b3]">{preview.eyebrow}</p>
-                    <h3 className="mt-1 text-2xl font-black text-[#101524]">{preview.title}</h3>
+                    <p className="text-sm font-black uppercase tracking-[0.2em] text-white/36">{preview.eyebrow}</p>
+                    <h3 className="mt-1 text-2xl font-black text-white">{preview.title}</h3>
                   </div>
                 </div>
                 <Gauge className="hidden text-[#31d99b] sm:block" />
               </div>
-              <p className="mt-6 text-lg font-black leading-8 text-[#5b667a]">{preview.body}</p>
+              <p className="mt-6 text-lg font-black leading-8 text-white/60">{preview.body}</p>
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {preview.bullets.map((item, index) => (
-                  <div key={item} className="landing-mini-step rounded-2xl border border-[#101524]/8 bg-white p-4 shadow-[0_12px_32px_rgba(19,33,58,0.08)]" style={{ animationDelay: `${index * 110}ms` }}>
+                  <div key={item} className="landing-mini-step rounded-2xl border border-white/10 bg-white/[0.06] p-4 shadow-[0_12px_32px_rgba(0,0,0,0.18)]" style={{ animationDelay: `${index * 110}ms` }}>
                     <BookOpenCheck size={18} className="text-[#31d99b]" />
-                    <p className="mt-3 text-sm font-black leading-5 text-[#101524]">{item}</p>
+                    <p className="mt-3 text-sm font-black leading-5 text-white/82">{item}</p>
                   </div>
                 ))}
               </div>
-              <div className="mt-7 rounded-2xl border border-[#101524]/8 bg-[#101524] p-4 text-white">
+              <div className="mt-7 rounded-2xl border border-white/10 bg-[#07070c] p-4 text-white">
                 <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.18em] text-white/42">
                   <span>proof sequence</span>
                   <span>live UI</span>
@@ -353,44 +353,44 @@ export function LandingPage() {
       <section className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
         <div className="grid gap-10 lg:grid-cols-[0.68fr_1.32fr]">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#0f8f67]">How it works</p>
-            <h2 className="mt-4 font-display text-4xl leading-tight text-[#101524] sm:text-6xl">Trust starts at launch and keeps updating.</h2>
+            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#69f0bd]">How it works</p>
+            <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">Trust starts at launch and keeps updating.</h2>
           </div>
           <div className="relative grid gap-4 md:grid-cols-2">
-            <div className="pointer-events-none absolute left-4 top-8 hidden h-[calc(100%-4rem)] w-1 rounded-full bg-[#dce8f5] md:block">
+            <div className="pointer-events-none absolute left-4 top-8 hidden h-[calc(100%-4rem)] w-1 rounded-full bg-white/10 md:block">
               <div className="h-3/4 w-full rounded-full bg-[linear-gradient(#31d99b,#ffb84d,#ff5c7a)] landing-progress-vertical" />
             </div>
             {steps.map(([num, title, body, Icon], index) => (
-              <div key={num} className="landing-step-card min-h-56 rounded-[28px] border border-[#101524]/10 bg-white p-6 shadow-[0_18px_52px_rgba(19,33,58,0.08)]" style={{ animationDelay: `${index * 100}ms` }}>
+              <div key={num} className="landing-step-card min-h-56 rounded-[28px] border border-white/10 bg-[#101524]/68 p-6 shadow-[0_18px_52px_rgba(0,0,0,0.22)]" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-black text-[#0f8f67]">{num}</p>
+                  <p className="text-sm font-black text-[#69f0bd]">{num}</p>
                   <Icon size={22} className="text-[#ff5c7a]" />
                 </div>
-                <h3 className="mt-8 text-2xl font-black text-[#101524]">{title}</h3>
-                <p className="mt-4 text-base font-black leading-7 text-[#5b667a]">{body}</p>
+                <h3 className="mt-8 text-2xl font-black text-white">{title}</h3>
+                <p className="mt-4 text-base font-black leading-7 text-white/56">{body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[#15213a]/10 bg-[#eaf7ff]">
+      <section className="border-y border-white/10 bg-[#090a12]">
         <div className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div className="max-w-3xl">
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#c76d00]">Hackathon tracks</p>
-              <h2 className="mt-4 font-display text-4xl leading-tight text-[#101524] sm:text-6xl">Built for Bags-native proof, creator reputation, social finance, and USDT value.</h2>
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#ffcf7a]">Hackathon tracks</p>
+              <h2 className="mt-4 font-display text-4xl leading-tight text-white sm:text-6xl">Built for Bags-native proof, creator reputation, social finance, and USDT value.</h2>
             </div>
-            <Link href="/hackathon" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#101524]/12 bg-white px-5 text-sm font-black text-[#101524] shadow-[0_14px_34px_rgba(19,33,58,0.08)] hover:bg-[#101524] hover:text-white">
+            <Link href="/hackathon" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-5 text-sm font-black text-white shadow-[0_14px_34px_rgba(0,0,0,0.2)] hover:bg-white hover:text-[#101524]">
               Pitch Deck <ArrowRight size={16} />
             </Link>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {tracks.map(([title, body, Icon], index) => (
-              <div key={title} className="landing-track-card rounded-[28px] border border-[#101524]/10 bg-white/82 p-6 shadow-[0_20px_58px_rgba(19,33,58,0.08)] backdrop-blur-xl" style={{ animationDelay: `${index * 80}ms` }}>
-                <Icon size={24} className="text-[#0f8f67]" />
-                <h3 className="mt-6 text-xl font-black text-[#101524]">{title}</h3>
-                <p className="mt-4 text-sm font-black leading-6 text-[#5b667a]">{body}</p>
+              <div key={title} className="landing-track-card rounded-[28px] border border-white/10 bg-white/[0.055] p-6 shadow-[0_20px_58px_rgba(0,0,0,0.2)] backdrop-blur-xl" style={{ animationDelay: `${index * 80}ms` }}>
+                <Icon size={24} className="text-[#69f0bd]" />
+                <h3 className="mt-6 text-xl font-black text-white">{title}</h3>
+                <p className="mt-4 text-sm font-black leading-6 text-white/54">{body}</p>
               </div>
             ))}
           </div>
@@ -398,7 +398,7 @@ export function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-[1480px] px-4 py-20 sm:px-6 lg:px-10">
-        <div className="relative overflow-hidden rounded-[38px] bg-[#101524] p-8 text-white shadow-[0_34px_100px_rgba(16,21,36,0.26)] sm:p-12 lg:p-16">
+        <div className="relative overflow-hidden rounded-[38px] border border-white/10 bg-[#101524] p-8 text-white shadow-[0_34px_100px_rgba(0,0,0,0.36)] sm:p-12 lg:p-16">
           <div className="absolute inset-0 landing-cta-sheen" />
           <div className="relative z-10">
             <LockKeyhole size={32} className="text-[#31d99b]" />
@@ -420,19 +420,19 @@ export function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-[#15213a]/10 bg-white">
+      <footer className="border-t border-white/10 bg-[#07070c]">
         <div className="mx-auto flex max-w-[1480px] flex-col gap-8 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-10">
           <div>
-            <p className="font-display text-2xl text-[#101524]">SignalCred</p>
-            <p className="mt-2 max-w-xl text-sm font-black leading-6 text-[#667085]">
+            <p className="font-display text-2xl text-white">SignalCred</p>
+            <p className="mt-2 max-w-xl text-sm font-black leading-6 text-white/46">
               Bags-native launch, trust, and social finance layer. No fake stats, no detached social feed, no hidden proof.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3 text-sm font-black text-[#667085]">
-            <Link href="/token" className="hover:text-[#101524]">Trust Index</Link>
-            <Link href="/fees" className="hover:text-[#101524]">Creator Reputation</Link>
-            <Link href="/square" className="hover:text-[#101524]">Token Social Proof</Link>
-            <Link href="/docs" className="hover:text-[#101524]">Docs</Link>
+          <div className="flex flex-wrap gap-3 text-sm font-black text-white/46">
+            <Link href="/token" className="hover:text-white">Trust Index</Link>
+            <Link href="/fees" className="hover:text-white">Creator Reputation</Link>
+            <Link href="/square" className="hover:text-white">Token Social Proof</Link>
+            <Link href="/docs" className="hover:text-white">Docs</Link>
           </div>
         </div>
       </footer>
