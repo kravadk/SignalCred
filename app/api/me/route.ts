@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { readJson, readWallet } from "@/lib/api-guards";
 
 export async function GET(req: NextRequest) {
-  const wallet = req.headers.get("x-wallet");
+  const wallet = readWallet(req);
   if (!wallet) return NextResponse.json({ user: null });
 
   const user = await db.query.users.findFirst({
@@ -17,15 +18,18 @@ export async function GET(req: NextRequest) {
 function isSafeImageUrl(v: string): boolean {
   const lower = v.trim().toLowerCase();
   if (lower.startsWith("https://") || lower.startsWith("http://")) return true;
-  if (lower.startsWith("data:image/")) return true;
+  if (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(lower)) return true;
   return false;
 }
 
 export async function PATCH(req: NextRequest) {
-  const wallet = req.headers.get("x-wallet");
-  if (!wallet) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const wallet = readWallet(req);
+  if (!wallet) return NextResponse.json({ error: "Valid wallet required", errorType: "invalid_wallet", userMessage: "Connect a valid Solana wallet before editing your profile." }, { status: 401 });
 
-  const body = await req.json();
+  const body = await readJson(req);
+  if (!body) {
+    return NextResponse.json({ error: "Invalid JSON body", errorType: "invalid_json", userMessage: "Profile update could not be read. Refresh and try again." }, { status: 400 });
+  }
   const update: Partial<{ username: string; avatarUrl: string; bio: string }> = {};
 
   if (body.username !== undefined) {

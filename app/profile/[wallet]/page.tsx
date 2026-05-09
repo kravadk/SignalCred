@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ArrowLeft, BadgeCheck, Camera, ChevronDown, ExternalLink, Gift, Loader2, ReceiptText, Save, ShieldAlert, WalletCards, X } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Camera, ChevronDown, ExternalLink, Gift, Loader2, MessageSquare, ReceiptText, Save, ShieldAlert, WalletCards, X } from "lucide-react";
 import { formatLamports, shortWallet } from "@/lib/utils";
 import { feeVelocitySubtitle, feeVelocityValue } from "@/lib/fee-velocity-display";
 import { ExplorerLink, shortAddress, solscanUrl } from "@/components/ui/ExplorerLink";
@@ -53,6 +53,16 @@ type CreatorReputation = {
     defaultRewardsPercent: number;
   };
   riskFlags: RiskFlag[];
+  officialUpdates?: Array<{
+    id: string;
+    content: string;
+    postType: string;
+    tokenMint?: string | null;
+    likesCount: number;
+    commentsCount: number;
+    repostsCount: number;
+    createdAt: string;
+  }>;
   campaigns?: Array<{ id: string; title: string; description?: string | null; budgetUsdt: string; status: string; tokenMint: string; createdAt: string }>;
   campaignTotals?: { count: number; plannedBudgetUsdt: number };
   solPriceUsdt: number;
@@ -186,8 +196,8 @@ function AvatarEditor({
   const uploadLocalAvatar = async (file: File | null) => {
     if (!file) return;
     setMessage("");
-    if (!file.type.startsWith("image/")) {
-      setMessage("Use an image file.");
+    if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.type)) {
+      setMessage("Use PNG, JPG, WEBP, or GIF.");
       return;
     }
     if (file.size > 140_000) {
@@ -514,6 +524,56 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
       </ProfileDetailSection>
 
       <div className="mt-3 space-y-2">
+        <ProfileDetailSection title="Recent Social Proof Activity" subtitle="Token-linked posts, updates, quotes, and reactions from this wallet." defaultOpen>
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <MessageSquare size={16} className="text-[#cdb6ff]" />
+                <h2 className="font-mono text-base font-black text-white">Recent Social Proof Activity</h2>
+              </div>
+              <p className="text-xs font-body font-semibold leading-5 text-white/38">
+                These rows update from Square posts and keep the creator profile tied to real token context.
+              </p>
+            </div>
+            <span className="rounded-md border border-[#b48dff]/20 bg-[#b48dff]/10 px-2 py-1 text-[11px] font-mono font-bold text-[#cdb6ff]">
+              {data.officialUpdates?.length ?? 0} posts
+            </span>
+          </div>
+          {!data.officialUpdates?.length ? (
+            <div className="rounded-lg border border-white/8 bg-white/[0.035] p-4 text-sm font-body font-semibold text-white/35">
+              No token-linked social proof posts from this wallet yet.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {data.officialUpdates.slice(0, 6).map((post) => (
+                <Link key={post.id} href={post.tokenMint ? `/token/${post.tokenMint}` : `/square/post/${post.id}`} className="block rounded-xl border border-white/[0.06] bg-white/[0.025] p-3 transition-colors hover:bg-white/[0.055]">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <span className="rounded-md border border-white/[0.08] bg-white/[0.045] px-2 py-1 text-[10px] font-body font-black uppercase text-white/48">
+                        {post.postType}
+                      </span>
+                      {post.tokenMint && (
+                        <span className="truncate rounded-md border border-[#00ff88]/15 bg-[#00ff88]/8 px-2 py-1 text-[10px] font-mono font-bold text-[#69d99a]">
+                          {shortAddress(post.tokenMint)}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-body font-black text-white/28">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="mt-2 line-clamp-2 text-sm font-body font-semibold leading-6 text-white/72">{post.content}</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-body font-black text-white/36">
+                    <span>{post.likesCount} likes</span>
+                    <span>{post.repostsCount} reposts</span>
+                    <span>{post.commentsCount} replies</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </ProfileDetailSection>
+
         <ProfileDetailSection title="USDT Treasury Planner" subtitle="Stable creator economics and preview-only campaign budgeting.">
           <CreatorTreasuryPanel wallet={data.creator.wallet} />
         </ProfileDetailSection>

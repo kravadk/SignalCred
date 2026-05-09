@@ -7,6 +7,7 @@ import { getBagsCreators } from "@/lib/bags-index";
 import { rateLimit } from "@/lib/rate-limit";
 import { hasRecentDuplicatePost } from "@/lib/token-social-proof";
 import { logAction } from "@/lib/action-log";
+import { readJson, readWallet } from "@/lib/api-guards";
 
 function isSafeMediaUrl(value: string) {
   const trimmed = value.trim();
@@ -182,10 +183,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const wallet = req.headers.get("x-wallet");
+  const wallet = readWallet(req);
   if (!wallet) {
-    logAction({ action: "post.create", type: "auth", status: "error", errorType: "unauthorized", message: "Missing x-wallet" });
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    logAction({ action: "post.create", type: "auth", status: "error", errorType: "invalid_wallet", message: "Missing or invalid x-wallet" });
+    return NextResponse.json({ error: "Valid wallet required", errorType: "invalid_wallet", userMessage: "Connect a valid Solana wallet before posting." }, { status: 401 });
   }
   const rl = rateLimit(`posts:${wallet}`, 10, 60_000);
   if (!rl.allowed) {
@@ -194,7 +195,18 @@ export async function POST(req: NextRequest) {
   }
   let authorWallet = wallet;
 
-  const { content, postType, tokenMint, mediaUrl, gatedMint, gatedAmount, quotedPostId } = await req.json();
+  const body = await readJson(req);
+  if (!body) {
+    logAction({ action: "post.create", type: "validation", status: "error", wallet, errorType: "invalid_json" });
+    return NextResponse.json({ error: "Invalid JSON body", errorType: "invalid_json", userMessage: "The post could not be read. Refresh and try again." }, { status: 400 });
+  }
+  const content = body.content;
+  const postType = typeof body.postType === "string" ? body.postType : "";
+  const tokenMint = typeof body.tokenMint === "string" ? body.tokenMint : undefined;
+  const mediaUrl = typeof body.mediaUrl === "string" ? body.mediaUrl : body.mediaUrl == null ? undefined : body.mediaUrl;
+  const gatedMint = typeof body.gatedMint === "string" ? body.gatedMint : undefined;
+  const gatedAmount = body.gatedAmount;
+  const quotedPostId = typeof body.quotedPostId === "string" ? body.quotedPostId : body.quotedPostId == null ? undefined : body.quotedPostId;
   const fail = (status: number, errorType: string, message: string, extra?: Record<string, unknown>) => {
     logAction({
       action: "post.create",
