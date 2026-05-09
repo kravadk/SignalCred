@@ -51,6 +51,32 @@ function statusIcon(status: TrustSignalStatus) {
   return <Sparkles size={13} />;
 }
 
+function statusPriority(status: TrustSignalStatus) {
+  if (status === "risk") return 4;
+  if (status === "verified") return 3;
+  if (status === "warming") return 2;
+  return 1;
+}
+
+function groupSignalsByToken(signals: TrustSignal[]) {
+  const groups = new Map<string, TrustSignal & { signals: TrustSignal[] }>();
+
+  for (const signal of signals) {
+    const existing = groups.get(signal.mint);
+    if (!existing) {
+      groups.set(signal.mint, { ...signal, signals: [signal] });
+      continue;
+    }
+
+    existing.signals.push(signal);
+    if (statusPriority(signal.status) > statusPriority(existing.status)) {
+      groups.set(signal.mint, { ...signal, signals: existing.signals });
+    }
+  }
+
+  return Array.from(groups.values());
+}
+
 export function TrustSignalsLive() {
   const [snapshot, setSnapshot] = useState<TrustSignalSnapshot | null>(null);
   const [status, setStatus] = useState<"connecting" | "live" | "fallback" | "delayed">("connecting");
@@ -97,7 +123,7 @@ export function TrustSignalsLive() {
   }, []);
 
   const signals = snapshot?.signals ?? [];
-  const visibleSignals = useMemo(() => signals.slice(0, 10), [signals]);
+  const visibleSignals = useMemo(() => groupSignalsByToken(signals).slice(0, 10), [signals]);
 
   return (
     <section className="overflow-hidden rounded-[24px] border border-white/[0.055] bg-[#100b22]/82 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
@@ -139,8 +165,10 @@ export function TrustSignalsLive() {
         <div className="flex gap-3 overflow-x-auto px-3 py-2.5">
           {visibleSignals.map((signal) => {
             const style = STATUS_STYLE[signal.status] ?? STATUS_STYLE.pending;
+            const labels = Array.from(new Map(signal.signals.map((item) => [item.label, item])).values()).slice(0, 3);
+            const hiddenCount = Math.max(signal.signals.length - labels.length, 0);
             return (
-              <div key={signal.id} className="flex min-w-[380px] items-center gap-3 rounded-xl border border-white/[0.045] bg-black/18 px-3 py-2.5 transition-colors hover:bg-white/[0.045]">
+              <div key={signal.mint} className="flex min-w-[420px] items-center gap-3 rounded-xl border border-white/[0.045] bg-black/18 px-3 py-2.5 transition-colors hover:bg-white/[0.045]">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-[#26aa68] via-[#7a55c6] to-[#ff624e] text-xs font-mono font-black text-white">
                     {signal.imageUrl ? <img src={signal.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" /> : signal.symbol.slice(0, 1)}
                   </div>
@@ -155,12 +183,21 @@ export function TrustSignalsLive() {
                     </Link>
                     <span className="shrink-0 text-[11px] font-mono text-white/28">/ {shortMint(signal.mint)}</span>
                   </div>
-                  <div className="mt-1.5 flex min-w-0 items-center gap-2">
-                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-body font-black uppercase ${style.bg} ${style.border} ${style.text}`}>
-                      {statusIcon(signal.status)}
-                      {signal.label}
-                    </span>
-                    <span className="truncate text-[11px] font-body text-white/38">{signal.source}</span>
+                  <div className="mt-1.5 flex min-w-0 items-center gap-1.5 overflow-hidden">
+                    {labels.map((item) => {
+                      const itemStyle = STATUS_STYLE[item.status] ?? STATUS_STYLE.pending;
+                      return (
+                        <span key={`${item.category}:${item.label}`} className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-body font-black uppercase ${itemStyle.bg} ${itemStyle.border} ${itemStyle.text}`}>
+                          {statusIcon(item.status)}
+                          {item.label}
+                        </span>
+                      );
+                    })}
+                    {hiddenCount > 0 && (
+                      <span className={`inline-flex shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-body font-black ${style.bg} ${style.border} ${style.text}`}>
+                        +{hiddenCount}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
