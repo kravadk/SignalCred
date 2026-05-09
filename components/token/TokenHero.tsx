@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { BadgeCheck, Copy, ExternalLink, Loader2, ShieldCheck, TrendingDown, TrendingUp } from "lucide-react";
+import { BadgeCheck, Copy, ExternalLink, Loader2, ShieldCheck, TrendingDown, TrendingUp, UserRound } from "lucide-react";
 import type { Token } from "@/db/schema";
 import { feeVelocitySubtitle, feeVelocityValue } from "@/lib/fee-velocity-display";
 import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
@@ -211,6 +211,15 @@ export function TokenHero({ token, mint }: { token: Token | null; mint: string }
               </button>
               {links.bagsToken && <ExplorerLink href={links.bagsToken} label="Bags.fm" className="text-xs" />}
               {links.dexScreener && <ExplorerLink href={links.dexScreener} label="DexScreener" className="text-xs" />}
+              {creatorWallet && (
+                <Link
+                  href={`/profile/${creatorWallet}`}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#b48dff]/18 bg-[#b48dff]/10 px-2 py-1 text-xs font-body font-black text-[#cdb6ff] hover:bg-[#b48dff]/14 hover:text-white"
+                >
+                  Creator Profile
+                  <UserRound size={11} />
+                </Link>
+              )}
               <Link
                 href={`/passport/${mint}`}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-[#00ff88]/18 bg-[#00ff88]/8 px-2 py-1 text-xs font-body font-black text-[#69d99a] hover:bg-[#00ff88]/12 hover:text-white"
@@ -249,7 +258,20 @@ export function TokenHero({ token, mint }: { token: Token | null; mint: string }
             <ProofPill ok={proof.pool} label="Pool proof" />
             <ProofPill ok={proof.creator} label="Creator proof" />
           </div>
-          <div className="flex items-center gap-2 text-[11px] font-body font-semibold text-white/42">
+          <div className="flex flex-wrap items-center justify-end gap-2 text-[11px] font-body font-semibold text-white/42">
+            {creatorWallet ? (
+              <Link
+                href={`/profile/${creatorWallet}`}
+                className="inline-flex min-h-[28px] items-center gap-1.5 rounded-lg border border-[#b48dff]/18 bg-[#b48dff]/10 px-2.5 font-body font-black text-[#cdb6ff] hover:bg-[#b48dff]/14 hover:text-white"
+              >
+                <UserRound size={12} />
+                Creator {shortWallet(creatorWallet)}
+              </Link>
+            ) : (
+              <span className="inline-flex min-h-[28px] items-center rounded-lg border border-white/[0.06] bg-white/[0.035] px-2.5 font-body font-black text-white/38">
+                Creator profile pending
+              </span>
+            )}
             {loading && <Loader2 size={13} className="animate-spin" />}
             {error ? "Summary delayed - evidence panels stay usable" : `Sources: ${Object.values(proof.sourceLabels ?? {}).filter(Boolean).join(" / ") || "loading"}`}
             <ShieldCheck size={13} className="text-[#69d99a]" />

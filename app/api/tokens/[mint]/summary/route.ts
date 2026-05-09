@@ -55,6 +55,12 @@ function readStringField(source: unknown, keys: string[]) {
   return null;
 }
 
+function readBase58FromArray(value: unknown) {
+  if (!Array.isArray(value)) return null;
+  const found = value.find((item) => typeof item === "string" && BASE58.test(item));
+  return typeof found === "string" ? found : null;
+}
+
 function readMetadataImage(metadata: unknown) {
   const rootImage = readStringField(metadata, ["imageUrl", "image", "image_uri", "logoURI", "logo"]);
   if (rootImage) return normalizeImageUrl(rootImage);
@@ -87,19 +93,23 @@ async function readImageFromMetadataUri(uri?: string | null) {
   }
 }
 
-async function getLiveBagsImage(mint: string, metadataUri?: string | null) {
-  const directFromMetadata = await readImageFromMetadataUri(metadataUri);
-  if (directFromMetadata) return directFromMetadata;
-
+async function getLiveBagsFeedItem(mint: string) {
   try {
     const feed = await withTimeout(getBagsLaunchFeed(), 3_500, []);
-    const item = feed.find((entry) => entry.tokenMint === mint);
-    const directImage = normalizeImageUrl(item?.image);
-    if (directImage) return directImage;
-    return readImageFromMetadataUri(item?.uri);
+    return feed.find((entry) => entry.tokenMint === mint) ?? null;
   } catch {
     return null;
   }
+}
+
+async function getLiveBagsImage(mint: string, metadataUri?: string | null, liveFeedItem?: Awaited<ReturnType<typeof getLiveBagsFeedItem>>) {
+  const directFromMetadata = await readImageFromMetadataUri(metadataUri);
+  if (directFromMetadata) return directFromMetadata;
+
+  const item = liveFeedItem ?? await getLiveBagsFeedItem(mint);
+  const directImage = normalizeImageUrl(item?.image);
+  if (directImage) return directImage;
+  return readImageFromMetadataUri(item?.uri);
 }
 
 export async function GET(_req: NextRequest, { params }: { params: { mint: string } }) {
@@ -120,17 +130,6 @@ export async function GET(_req: NextRequest, { params }: { params: { mint: strin
     withTimeout(getBagsClaimEvents(params.mint, { from: since24h, to: now, limit: 100 }), 2_500, []),
     withTimeout(db.select().from(posts).where(eq(posts.tokenMint, params.mint)).limit(50), 2_500, []),
   ]);
-  const cachedImageUrl =
-    normalizeImageUrl(token?.imageUrl) ??
-    readMetadataImage(token?.metadata) ??
-    normalizeImageUrl(marketData?.logoURI);
-  const liveBagsImageUrl = cachedImageUrl
-    ? null
-    : await getLiveBagsImage(
-        params.mint,
-        typeof bagsMeta.uri === "string" ? bagsMeta.uri : null
-      );
-
   const lifetimeFeesLamports = Number(lifetimeFeesRaw ?? 0);
   const safeLifetimeFeesLamports = Number.isFinite(lifetimeFeesLamports) ? lifetimeFeesLamports : 0;
   const feeVelocity = await withTimeout(
@@ -139,10 +138,26 @@ export async function GET(_req: NextRequest, { params }: { params: { mint: strin
     null
   );
   const creator = creators.find((entry) => entry.isCreator && entry.wallet) ?? creators.find((entry) => entry.wallet);
+  const metadataSignerWallet = readBase58FromArray(bagsMeta.accountKeys);
+  const needsLiveFeed = !token?.creatorWallet && !creator?.wallet && !metadataSignerWallet;
+  const cachedImageUrl =
+    normalizeImageUrl(token?.imageUrl) ??
+    readMetadataImage(token?.metadata) ??
+    normalizeImageUrl(marketData?.logoURI);
+  const liveFeedItem = !cachedImageUrl || needsLiveFeed ? await getLiveBagsFeedItem(params.mint) : null;
+  const liveBagsImageUrl = cachedImageUrl
+    ? null
+    : await getLiveBagsImage(
+        params.mint,
+        typeof bagsMeta.uri === "string" ? bagsMeta.uri : null,
+        liveFeedItem
+      );
+  const liveSignerWallet = readBase58FromArray(liveFeedItem?.accountKeys);
+  const creatorWallet = token?.creatorWallet ?? creator?.wallet ?? metadataSignerWallet ?? liveSignerWallet ?? null;
   const poolKey = pool?.dbcPoolKey || pool?.dammV2PoolKey || bagsMeta.dbcPoolKey || bagsMeta.dammV2PoolKey || null;
   const hasFeedProof = Boolean(bagsMeta.importedFromBags || bagsMeta.source === "token-launch/feed");
   const hasPoolProof = Boolean(pool || bagsMeta.poolVerified || poolKey);
-  const hasCreatorProof = Boolean(creator?.wallet);
+  const hasCreatorProof = Boolean(token?.creatorWallet || creator?.wallet);
   const claimedFees24hLamports = sumClaimEventsLamports(claimEvents24h);
   const officialUpdates = socialRows.filter((row) => row.postType === "official" || row.postType === "launch").length;
   const uniqueSocialWallets = new Set(socialRows.map((row) => row.authorWallet).filter(Boolean)).size;
@@ -183,7 +198,7 @@ export async function GET(_req: NextRequest, { params }: { params: { mint: strin
       description: token?.description ?? null,
       imageUrl: cachedImageUrl ?? liveBagsImageUrl,
       launchStatus: token?.launchStatus ?? "live",
-      creatorWallet: token?.creatorWallet ?? creator?.wallet ?? null,
+      creatorWallet,
       launchedAt: token?.launchedAt ?? token?.createdAt ?? null,
     },
     market: marketData
@@ -246,8 +261,8 @@ export async function GET(_req: NextRequest, { params }: { params: { mint: strin
       bagsToken: `https://bags.fm/${params.mint}`,
       dexScreener: marketData?.pairAddress ? `https://dexscreener.com/solana/${marketData.pairAddress}` : null,
       pool: poolKey ? `https://solscan.io/account/${poolKey}` : null,
-      creator: creator?.wallet ? `https://solscan.io/account/${creator.wallet}` : null,
-      creatorProfile: creator?.wallet ? `/profile/${creator.wallet}` : token?.creatorWallet ? `/profile/${token.creatorWallet}` : null,
+      creator: creatorWallet ? `https://solscan.io/account/${creatorWallet}` : null,
+      creatorProfile: creatorWallet ? `/profile/${creatorWallet}` : null,
     },
     source: {
       token: token ? "local_token_db" : "derived_from_live_sources",

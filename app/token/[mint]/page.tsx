@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft, BadgeCheck, ExternalLink, Globe2, MessageCircle, Send } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ExternalLink, Globe2, MessageCircle, Send, UserRound } from "lucide-react";
 import { eq, desc } from "drizzle-orm";
 import { TokenHero } from "@/components/token/TokenHero";
 import { PriceChart } from "@/components/token/PriceChart";
@@ -163,6 +163,15 @@ export default async function TokenPage({ params }: { params: { mint: string } }
           Bags.fm
           <ExternalLink size={13} />
         </a>
+        {token?.creatorWallet && (
+          <Link
+            href={`/profile/${token.creatorWallet}`}
+            className="inline-flex min-h-[34px] items-center gap-2 rounded-md border border-[#b48dff]/18 bg-[#b48dff]/10 px-3 text-xs font-mono font-bold text-[#cdb6ff] transition-colors hover:bg-[#b48dff]/14 hover:text-white"
+          >
+            Creator Profile
+            <UserRound size={13} />
+          </Link>
+        )}
         <Link
           href={`/passport/${params.mint}`}
           className="inline-flex min-h-[34px] items-center gap-2 rounded-md border border-[#00ff88]/18 bg-[#00ff88]/8 px-3 text-xs font-mono font-bold text-[#69d99a] transition-colors hover:bg-[#00ff88]/12 hover:text-white"
