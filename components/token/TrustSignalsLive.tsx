@@ -151,8 +151,10 @@ export function TrustSignalsLive() {
   const visibleSignals = useMemo(() => groupSignalsByToken(signals).slice(0, 10), [signals]);
 
   return (
-    <section className="overflow-hidden rounded-[24px] border border-white/[0.055] bg-[#100b22]/82 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.055] px-3 py-2">
+    <section className="relative overflow-hidden rounded-[24px] border border-[#2c7257]/40 bg-[#08131b]/92 shadow-[0_18px_56px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(105,217,154,0.08)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#00ff88]/42 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#00ff88]/24 via-transparent to-transparent" />
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2c7257]/22 bg-black/12 px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${
             status === "live" ? "border-[#00ff88]/25 bg-[#00ff88]/10 text-[#00ff88]" : "border-[#ffb84d]/25 bg-[#ffb84d]/10 text-[#ffcc7a]"
@@ -187,13 +189,13 @@ export function TrustSignalsLive() {
           {status === "delayed" ? "Trust signals delayed. Check judge status for data-source health." : "Collecting live proof signals..."}
         </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto px-3 py-2.5">
+        <div className="flex gap-3 overflow-x-auto px-3 py-3">
           {visibleSignals.map((signal) => {
             const style = STATUS_STYLE[signal.status] ?? STATUS_STYLE.pending;
             const labels = Array.from(new Map(signal.signals.map((item) => [item.label, item])).values()).slice(0, 3);
             const hiddenCount = Math.max(signal.signals.length - labels.length, 0);
             return (
-              <div key={signal.mint} className="flex min-w-[420px] items-center gap-3 rounded-xl border border-white/[0.045] bg-black/18 px-3 py-2.5 transition-colors hover:bg-white/[0.045]">
+              <div key={signal.mint} className="flex min-w-[420px] items-center gap-3 rounded-xl border border-[#314066]/50 bg-[#0a0d19]/82 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-colors hover:border-[#00ff88]/22 hover:bg-white/[0.045]">
                 <SignalImage signal={signal} />
                 <div className="min-w-0 flex-1">
                   <div className="flex min-w-0 items-center gap-1.5">
@@ -242,7 +244,7 @@ export function TrustSignalsLive() {
         </div>
       )}
 
-      <p className="border-t border-white/[0.055] px-3 py-1.5 text-[11px] font-body text-white/30">
+      <p className="border-t border-[#2c7257]/18 bg-black/10 px-3 py-1.5 text-[11px] font-body text-white/30">
         No fake data. Missing proof stays warming or risk until Bags, fee snapshots, Square, or campaign records confirm it.
       </p>
     </section>
