@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
 import { count, desc, eq, sum } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { posts, rewardCampaigns, tokens } from "@/db/schema";
+import { posts, rewardCampaigns, tokens, users } from "@/db/schema";
 import { getTokenOverview } from "@/lib/birdeye";
 import { getBagsClaimEvents, getBagsCreators, getBagsLifetimeFees, getBagsPoolByMint } from "@/lib/bags-index";
 import { getFeeVelocity24h } from "@/lib/fee-velocity";
@@ -67,6 +67,8 @@ export async function GET(req: NextRequest, { params }: { params: { wallet: stri
     .where(eq(tokens.creatorWallet, wallet))
     .orderBy(desc(tokens.launchedAt))
     .limit(80);
+
+  const user = await db.query.users.findFirst({ where: eq(users.wallet, wallet) });
 
   const enrichedSettled = await Promise.allSettled(
     localTokens.slice(0, 40).map(async (token) => {
@@ -188,6 +190,9 @@ export async function GET(req: NextRequest, { params }: { params: { wallet: stri
       wallet,
       solscan: `https://solscan.io/account/${wallet}`,
       verifiedTokenCount: totals.verifiedTokens,
+      username: user?.username ?? null,
+      avatarUrl: user?.avatarUrl ?? null,
+      bio: user?.bio ?? null,
     },
     tokens: creatorTokens,
     officialUpdates,

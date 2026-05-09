@@ -66,7 +66,13 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "no fields to update" }, { status: 400 });
   }
 
-  await db.update(users).set(update).where(eq(users.wallet, wallet));
+  await db
+    .insert(users)
+    .values({ wallet, ...update })
+    .onConflictDoUpdate({
+      target: users.wallet,
+      set: update,
+    });
   const user = await db.query.users.findFirst({ where: eq(users.wallet, wallet) });
   return NextResponse.json({ user });
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, BadgeCheck, ChevronDown, ExternalLink, Gift, Loader2, ReceiptText, ShieldAlert, WalletCards } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { ArrowLeft, BadgeCheck, Camera, ChevronDown, ExternalLink, Gift, Loader2, ReceiptText, Save, ShieldAlert, WalletCards, X } from "lucide-react";
 import { formatLamports, shortWallet } from "@/lib/utils";
 import { feeVelocitySubtitle, feeVelocityValue } from "@/lib/fee-velocity-display";
 import { ExplorerLink, shortAddress, solscanUrl } from "@/components/ui/ExplorerLink";
@@ -30,7 +31,7 @@ type CreatorToken = {
 };
 
 type CreatorReputation = {
-  creator: { wallet: string; solscan: string; verifiedTokenCount: number };
+  creator: { wallet: string; solscan: string; verifiedTokenCount: number; username?: string | null; avatarUrl?: string | null; bio?: string | null };
   tokens: CreatorToken[];
   totals: {
     tokenCount: number;
@@ -107,13 +108,184 @@ function TokenAvatar({ src, symbol }: { src?: string | null; symbol: string }) {
   );
 }
 
+function ProfileImage({ src, wallet, className = "h-16 w-16 rounded-2xl" }: { src?: string | null; wallet: string; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  const image = failed ? null : normalizeImageUrl(src);
+  const label = shortWallet(wallet).replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || "SC";
+  return (
+    <div className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-[#1adf91] via-[#34a8ff] to-[#8b5cf6] text-lg font-black text-white shadow-[0_0_24px_rgba(80,216,164,0.18)] ${className}`}>
+      {image ? (
+        <img src={image} alt="Creator avatar" className="h-full w-full object-cover" loading="lazy" onError={() => setFailed(true)} />
+      ) : (
+        <span>{label}</span>
+      )}
+    </div>
+  );
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function AvatarEditor({
+  wallet,
+  initialAvatarUrl,
+  onSaved,
+}: {
+  wallet: string;
+  initialAvatarUrl?: string | null;
+  onSaved: (avatarUrl: string | null) => void;
+}) {
+  const { publicKey } = useWallet();
+  const isOwner = publicKey?.toBase58() === wallet;
+  const [open, setOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl ?? "");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setAvatarUrl(initialAvatarUrl ?? "");
+  }, [initialAvatarUrl]);
+
+  if (!isOwner) {
+    return (
+      <p className="mt-3 max-w-xl rounded-md border border-white/[0.06] bg-white/[0.025] px-3 py-2 text-xs font-body font-semibold leading-5 text-white/38">
+        {publicKey ? "Only this creator wallet can edit the profile avatar." : "Connect this creator wallet to edit the profile avatar."}
+      </p>
+    );
+  }
+
+  const saveAvatar = async (nextUrl = avatarUrl) => {
+    setSaving(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-wallet": wallet },
+        body: JSON.stringify({ avatarUrl: nextUrl.trim() }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMessage(body.error ?? "Avatar save failed");
+        return;
+      }
+      onSaved(body.user?.avatarUrl ?? null);
+      setAvatarUrl(body.user?.avatarUrl ?? "");
+      setMessage("Avatar saved");
+      setOpen(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const uploadLocalAvatar = async (file: File | null) => {
+    if (!file) return;
+    setMessage("");
+    if (!file.type.startsWith("image/")) {
+      setMessage("Use an image file.");
+      return;
+    }
+    if (file.size > 140_000) {
+      setMessage("Avatar must be under 140 KB for local profile storage.");
+      return;
+    }
+    const dataUrl = await readFileAsDataUrl(file);
+    setAvatarUrl(dataUrl);
+    await saveAvatar(dataUrl);
+  };
+
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="inline-flex min-h-[34px] items-center gap-2 rounded-md border border-[#00ff88]/18 bg-[#00ff88]/8 px-3 text-xs font-body font-black text-[#69d99a] hover:bg-[#00ff88]/12"
+      >
+        <Camera size={14} />
+        {open ? "Close avatar editor" : "Edit avatar"}
+      </button>
+      {open && (
+        <div className="mt-3 rounded-lg border border-white/[0.06] bg-white/[0.025] p-3">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              value={avatarUrl}
+              onChange={(event) => setAvatarUrl(event.target.value)}
+              placeholder="https://... or small data:image avatar"
+              className="min-h-[38px] min-w-0 flex-1 rounded-md border border-white/[0.07] bg-black/20 px-3 text-xs font-body font-semibold text-white outline-none placeholder:text-white/25 focus:border-[#00ff88]/35"
+            />
+            <label className="inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.045] px-3 text-xs font-body font-black text-white/68 hover:bg-white/[0.07]">
+              <Camera size={14} />
+              Upload
+              <input type="file" accept="image/*" className="hidden" onChange={(event) => uploadLocalAvatar(event.target.files?.[0] ?? null)} />
+            </label>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => saveAvatar()}
+              className="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-md bg-white px-3 text-xs font-body font-black text-black disabled:opacity-50"
+            >
+              <Save size={14} />
+              Save
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => saveAvatar("")}
+              className="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.035] px-3 text-xs font-body font-black text-white/60 disabled:opacity-50"
+            >
+              <X size={14} />
+              Clear
+            </button>
+          </div>
+          {message && <p className="mt-2 text-xs font-body font-semibold text-white/48">{message}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProfileDetailSection({
+  title,
+  subtitle,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <details open={isOpen} onToggle={(event) => setIsOpen(event.currentTarget.open)} className="group min-w-0 overflow-visible rounded-lg border border-white/[0.05] bg-white/[0.018]">
+      <summary className="flex min-h-[54px] cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-white/[0.04] group-open:sticky group-open:top-[58px] group-open:z-20 group-open:border-b group-open:border-white/[0.055] group-open:bg-[#100b22] group-open:shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
+        <span className="min-w-0">
+          <span className="block text-sm font-body font-black leading-5 text-white">{title}</span>
+          <span className="mt-0.5 block text-xs font-body font-semibold leading-5 text-white/56">{subtitle}</span>
+        </span>
+        <span className="shrink-0 rounded-md bg-white/[0.055] px-2 py-1 text-[11px] font-body font-black text-white/58 group-open:bg-[#00ff88]/10 group-open:text-[#69d99a]">
+          <span className="group-open:hidden">Show</span>
+          <span className="hidden group-open:inline">Hide</span>
+        </span>
+      </summary>
+      <div className="min-w-0 border-t border-white/[0.05] p-3">
+        {children}
+      </div>
+    </details>
+  );
+}
+
 export default function CreatorProfilePage({ params }: { params: { wallet: string } }) {
   const [data, setData] = useState<CreatorReputation | null>(null);
   const [feeLoops, setFeeLoops] = useState<CompactFeeLoop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [graphOpen, setGraphOpen] = useState(false);
-  const [treasuryOpen, setTreasuryOpen] = useState(false);
+  const [avatarOverride, setAvatarOverride] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -158,9 +330,9 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
       <div className="focus-shell flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
           <Loader2 size={28} className="mx-auto animate-spin text-white/30" />
-          <p className="mt-4 text-sm font-fun font-black text-white/70">Creator Reliability Score</p>
-          <p className="mt-2 text-sm font-fun font-black text-white/60">USDT Creator Treasury</p>
-          <p className="mt-4 text-sm font-fun font-black text-white/45">Recent Fee Loop Evidence</p>
+          <p className="mt-4 text-sm font-body font-black text-white/70">Creator Reliability Score</p>
+          <p className="mt-2 text-sm font-body font-black text-white/60">USDT Creator Treasury</p>
+          <p className="mt-4 text-sm font-body font-black text-white/45">Recent Fee Loop Evidence</p>
         </div>
       </div>
     );
@@ -174,11 +346,14 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
         </Link>
         <div className="card p-8 text-center">
           <ShieldAlert size={34} className="mx-auto mb-3 text-[#ff624e]" />
-          <p className="font-fun font-bold text-white">{error || "Creator reputation unavailable"}</p>
+          <p className="font-body font-bold text-white">{error || "Creator reputation unavailable"}</p>
         </div>
       </div>
     );
   }
+
+  const avatarUrl = avatarOverride ?? data.creator.avatarUrl ?? null;
+  const displayName = data.creator.username || shortWallet(data.creator.wallet);
 
   return (
     <div className="focus-shell">
@@ -188,17 +363,27 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
 
       <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_300px]">
         <section className="card p-4">
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <span className="track-pill mb-2 border-[#00ff88]/20 bg-[#00ff88]/10 text-[#00ff88]">
-                <BadgeCheck size={13} /> Creator reputation
-              </span>
-              <h1 className="font-mono text-2xl font-black text-white md:text-3xl">{shortWallet(data.creator.wallet)}</h1>
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-fun">
+          <div className="mb-4 flex flex-wrap items-start gap-4">
+            <ProfileImage src={avatarUrl} wallet={data.creator.wallet} />
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="track-pill border-[#00ff88]/20 bg-[#00ff88]/10 text-[#00ff88]">
+                  <BadgeCheck size={13} /> Creator reputation
+                </span>
+                {data.creator.username && (
+                  <span className="rounded-md border border-white/8 bg-white/[0.045] px-2 py-1 text-[11px] font-body font-black text-white/50">
+                    @{data.creator.username}
+                  </span>
+                )}
+              </div>
+              <h1 className="truncate font-body text-2xl font-black tracking-[-0.02em] text-white md:text-3xl">{displayName}</h1>
+              {data.creator.bio && <p className="mt-2 max-w-3xl text-sm font-body font-semibold leading-6 text-white/52">{data.creator.bio}</p>}
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-body font-semibold">
                 <ExplorerLink href={data.creator.solscan} label={shortAddress(data.creator.wallet)} />
                 <span className="text-white/35">{data.creator.verifiedTokenCount} verified token proofs</span>
                 <span className="text-white/35">SOL ~= {data.solPriceUsdt.toFixed(2)} USDT</span>
               </div>
+              <AvatarEditor wallet={data.creator.wallet} initialAvatarUrl={avatarUrl} onSaved={setAvatarOverride} />
             </div>
           </div>
 
@@ -212,18 +397,18 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
               <div key={label} className="rounded-lg border border-white/8 bg-white/5 p-3">
                 <p className="text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-white/35">{label}</p>
                 <p className="mt-1 truncate font-mono text-lg font-black text-white">{value}</p>
-                <p className="mt-1 text-[11px] font-body text-[#50d8a4]">{sub}</p>
+                <p className="mt-1 text-[11px] font-body font-semibold text-[#50d8a4]">{sub}</p>
               </div>
             ))}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
             {data.riskFlags.length ? data.riskFlags.map((flag) => (
-              <span key={flag.id} className={`rounded-xl border px-3 py-1.5 text-xs font-fun font-bold ${riskClass(flag.severity)}`}>
+              <span key={flag.id} className={`rounded-xl border px-3 py-1.5 text-xs font-body font-bold ${riskClass(flag.severity)}`}>
                 {flag.label}
               </span>
             )) : (
-              <span className="rounded-xl border border-[#00ff88]/20 bg-[#00ff88]/10 px-3 py-1.5 text-xs font-fun font-bold text-[#00ff88]">
+              <span className="rounded-xl border border-[#00ff88]/20 bg-[#00ff88]/10 px-3 py-1.5 text-xs font-body font-bold text-[#00ff88]">
                 No major creator-level risk flags
               </span>
             )}
@@ -252,31 +437,20 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
               <span className="font-mono text-[#ffcc7a]">preview only</span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setTreasuryOpen((value) => !value)}
-            className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-white/8 bg-white/[0.04] text-xs font-bold text-white/70 hover:bg-white/[0.07]"
-          >
-            {treasuryOpen ? "Hide planner" : "Open planner"}
-            <ChevronDown size={14} className={treasuryOpen ? "rotate-180 transition" : "transition"} />
-          </button>
+          <p className="mt-3 rounded-md border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-body font-semibold leading-5 text-white/42">
+            Full treasury controls live below, same as token detail: compact summary first, deep tools on demand.
+          </p>
         </aside>
       </div>
 
-      {treasuryOpen && (
-        <div className="mb-3">
-          <CreatorTreasuryPanel wallet={data.creator.wallet} />
-        </div>
-      )}
-
-      <section className="card mb-4 p-4">
+      <ProfileDetailSection title="Recent Fee Loop Evidence" subtitle="Generated fees, claimed fees, and campaign funding state." defaultOpen>
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <ReceiptText size={16} className="text-[#ffcc7a]" />
               <h2 className="font-mono text-base font-black text-white">Recent Fee Loop Evidence</h2>
             </div>
-            <p className="text-xs font-fun leading-5 text-white/38">
+            <p className="text-xs font-body font-semibold leading-5 text-white/38">
               Compact proof across the latest creator tokens: generated fees, claimed fees, and campaign funding state.
             </p>
           </div>
@@ -286,7 +460,7 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
         </div>
 
         {data.tokens.length === 0 ? (
-          <div className="rounded-2xl border border-white/8 bg-white/[0.035] p-4 text-sm font-fun text-white/35">
+          <div className="rounded-lg border border-white/8 bg-white/[0.035] p-4 text-sm font-body font-semibold text-white/35">
             No indexed creator tokens yet.
           </div>
         ) : (
@@ -306,7 +480,7 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
                     <div className="flex min-w-0 items-center gap-3">
                       <TokenAvatar src={token.imageUrl} symbol={token.symbol} />
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-fun font-black text-white">{token.name}</p>
+                        <p className="truncate text-sm font-body font-black text-white">{token.name}</p>
                         <p className="truncate text-xs font-mono text-white/35">{token.symbol} - {shortAddress(token.mint)}</p>
                       </div>
                     </div>
@@ -314,22 +488,22 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
                   </div>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between gap-3 rounded-xl bg-white/[0.04] px-3 py-2">
-                      <span className="font-fun text-white/38">Lifetime</span>
+                      <span className="font-body font-semibold text-white/38">Lifetime</span>
                       <span className="font-mono text-[#00ff88]">{formatLamports(loop?.lifetimeFeesLamports ?? token.lifetimeFeesLamports)}</span>
                     </div>
                     <div className="flex justify-between gap-3 rounded-xl bg-white/[0.04] px-3 py-2">
-                      <span className="font-fun text-white/38">Claimed 24h</span>
+                      <span className="font-body font-semibold text-white/38">Claimed 24h</span>
                       <span className="font-mono text-white">{formatLamports(loop?.claimedFees24hLamports ?? token.claimedFees24hLamports)}</span>
                     </div>
                     <div className="flex justify-between gap-3 rounded-xl bg-white/[0.04] px-3 py-2">
-                      <span className="font-fun text-white/38">Velocity</span>
-                      <span className="font-fun font-black text-[#ffcc7a]">
+                      <span className="font-body font-semibold text-white/38">Velocity</span>
+                      <span className="font-body font-black text-[#ffcc7a]">
                         {feeVelocityValue(loop?.feeVelocityStatus ?? token.feeVelocityStatus, loop?.feeVelocity24hLamports ?? token.feeVelocity24hLamports)}
                       </span>
                     </div>
                     <div className="flex justify-between gap-3 rounded-xl bg-white/[0.04] px-3 py-2">
-                      <span className="font-fun text-white/38">Campaign</span>
-                      <span className="font-fun font-black text-[#cdb6ff]">{campaignState}</span>
+                      <span className="font-body font-semibold text-white/38">Campaign</span>
+                      <span className="font-body font-black text-[#cdb6ff]">{campaignState}</span>
                     </div>
                   </div>
                 </Link>
@@ -337,108 +511,101 @@ export default function CreatorProfilePage({ params }: { params: { wallet: strin
             })}
           </div>
         )}
-      </section>
+      </ProfileDetailSection>
 
-      <section className="card mb-3 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setGraphOpen((value) => !value)}
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-white/[0.035]"
-        >
-          <span>
-            <span className="block font-mono text-base font-black text-white">Creator Trust Graph</span>
-            <span className="mt-1 block text-xs font-body text-white/38">Open creator history, linked wallets, suspicious patterns, and score breakdown.</span>
-          </span>
-          <ChevronDown size={16} className={graphOpen ? "rotate-180 text-white/60 transition" : "text-white/35 transition"} />
-        </button>
-        {graphOpen && (
-          <div className="border-t border-white/6 p-4">
-            <CreatorTrustGraph wallet={data.creator.wallet} />
-          </div>
-        )}
-      </section>
+      <div className="mt-3 space-y-2">
+        <ProfileDetailSection title="USDT Treasury Planner" subtitle="Stable creator economics and preview-only campaign budgeting.">
+          <CreatorTreasuryPanel wallet={data.creator.wallet} />
+        </ProfileDetailSection>
 
-      <section className="card mb-4 p-4">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <div className="mb-2 flex items-center gap-2">
-              <Gift size={16} className="text-[#50d8a4]" />
-              <h2 className="font-mono text-base font-black text-white">USDT Campaign Budget</h2>
+        <ProfileDetailSection title="Creator Trust Graph" subtitle="Creator history, linked wallets, suspicious patterns, and score breakdown.">
+          <CreatorTrustGraph wallet={data.creator.wallet} />
+        </ProfileDetailSection>
+
+        <ProfileDetailSection title="USDT Campaign Budget" subtitle="Planned creator reward budgets tied to Bags tokens.">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <Gift size={16} className="text-[#50d8a4]" />
+                <h2 className="font-mono text-base font-black text-white">USDT Campaign Budget</h2>
+              </div>
+              <p className="text-xs font-body font-semibold leading-5 text-white/38">
+                Planned creator reward budgets tied to Bags tokens. Preview only - no transaction executed.
+              </p>
             </div>
-            <p className="text-xs font-fun leading-5 text-white/38">
-              Planned creator reward budgets tied to Bags tokens. Preview only - no transaction executed.
-            </p>
+            <span className="rounded-xl border border-[#26a17b]/20 bg-[#26a17b]/10 px-3 py-1 text-sm font-body font-black text-[#50d8a4]">
+              {usd(data.campaignTotals?.plannedBudgetUsdt ?? 0)}
+            </span>
           </div>
-          <span className="rounded-xl border border-[#26a17b]/20 bg-[#26a17b]/10 px-3 py-1 text-sm font-fun font-black text-[#50d8a4]">
-            {usd(data.campaignTotals?.plannedBudgetUsdt ?? 0)}
-          </span>
-        </div>
-        {!data.campaigns?.length ? (
-          <div className="rounded-2xl border border-white/8 bg-white/[0.035] p-4 text-sm font-fun text-white/35">
-            No planned USDT reward campaigns yet.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {data.campaigns.map((campaign) => (
-              <Link key={campaign.id} href={`/token/${campaign.tokenMint}`} className="rounded-2xl border border-white/8 bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.07]">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-fun font-black text-white">{campaign.title}</p>
-                    <p className="mt-1 text-xs font-fun text-white/35">{shortAddress(campaign.tokenMint)}</p>
+          {!data.campaigns?.length ? (
+            <div className="rounded-lg border border-white/8 bg-white/[0.035] p-4 text-sm font-body font-semibold text-white/35">
+              No planned USDT reward campaigns yet.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {data.campaigns.map((campaign) => (
+                <Link key={campaign.id} href={`/token/${campaign.tokenMint}`} className="rounded-xl border border-white/8 bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.07]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-body font-black text-white">{campaign.title}</p>
+                      <p className="mt-1 text-xs font-body font-semibold text-white/35">{shortAddress(campaign.tokenMint)}</p>
+                    </div>
+                    <span className="shrink-0 rounded-xl border border-[#26a17b]/20 bg-[#26a17b]/10 px-2.5 py-1 text-xs font-body font-black text-[#50d8a4]">
+                      {usd(Number(campaign.budgetUsdt))}
+                    </span>
                   </div>
-                  <span className="shrink-0 rounded-xl border border-[#26a17b]/20 bg-[#26a17b]/10 px-2.5 py-1 text-xs font-fun font-black text-[#50d8a4]">
-                    {usd(Number(campaign.budgetUsdt))}
-                  </span>
+                  {campaign.description && <p className="mt-2 line-clamp-2 text-xs font-body font-semibold leading-5 text-white/38">{campaign.description}</p>}
+                  <p className="mt-2 text-[10px] font-body font-black uppercase text-white/28">{campaign.status}</p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </ProfileDetailSection>
+
+        <ProfileDetailSection title="Creator Tokens" subtitle="All indexed tokens for this creator with fees, velocity, and proof labels." defaultOpen>
+          <div className="overflow-hidden rounded-lg border border-white/[0.05] bg-white/[0.015]">
+            <div className="border-b border-white/8 px-4 py-3">
+              <h2 className="font-mono text-base font-black text-white">Creator Tokens</h2>
+              <p className="text-xs font-body font-semibold text-white/35">Fees are shown in SOL with approximate USDT stable value.</p>
+            </div>
+            {data.tokens.length === 0 ? (
+              <div className="p-8 text-center text-sm font-body font-semibold text-white/35">No indexed creator tokens yet.</div>
+            ) : data.tokens.map((token) => (
+              <Link key={token.mint} href={`/token/${token.mint}`} className="grid grid-cols-1 gap-3 border-b border-white/5 px-5 py-4 transition-colors hover:bg-white/5 md:grid-cols-12 md:items-center">
+                <div className="flex min-w-0 items-center gap-3 md:col-span-4">
+                  <TokenAvatar src={token.imageUrl} symbol={token.symbol} />
+                  <div className="min-w-0">
+                    <p className="truncate font-body font-black text-white">{token.name}</p>
+                    <p className="truncate text-xs font-mono text-white/35">{token.symbol} - {shortAddress(token.mint)}</p>
+                  </div>
                 </div>
-                {campaign.description && <p className="mt-2 line-clamp-2 text-xs font-fun leading-5 text-white/38">{campaign.description}</p>}
-                <p className="mt-2 text-[10px] font-fun font-black uppercase text-white/28">{campaign.status}</p>
+                <div className="md:col-span-2">
+                  <p className="text-[10px] font-body font-black uppercase text-white/30">Lifetime</p>
+                  <p className="font-mono text-[#00ff88]">{formatLamports(token.lifetimeFeesLamports)}</p>
+                  <p className="text-xs font-body font-semibold text-[#50d8a4]">{usd(token.lifetimeFeesUsdt)}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-[10px] font-body font-black uppercase text-white/30">Generated 24h</p>
+                  <p className="font-mono text-[#ffcc7a]">{feeVelocityValue(token.feeVelocityStatus, token.feeVelocity24hLamports)}</p>
+                  <p className="text-xs font-body font-semibold text-[#ffcc7a]">
+                    {token.feeVelocity24hUsdt == null ? feeVelocitySubtitle(token.feeVelocityStatus) : usd(token.feeVelocity24hUsdt)}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-[10px] font-body font-black uppercase text-white/30">Claimed 24h</p>
+                  <p className="font-mono text-white">{formatLamports(token.claimedFees24hLamports)}</p>
+                  <p className="text-xs font-body font-semibold text-white/40">{usd(token.claimedFees24hUsdt)}</p>
+                </div>
+                <div className="flex flex-wrap justify-start gap-2 md:col-span-2 md:justify-end">
+                  {token.creatorProof && <span className="rounded-lg border border-[#00ff88]/20 bg-[#00ff88]/10 px-2 py-1 text-xs font-body font-semibold text-[#00ff88]">Creator proof</span>}
+                  {token.poolVerified && <span className="rounded-lg border border-[#b48dff]/20 bg-[#b48dff]/10 px-2 py-1 text-xs font-body font-semibold text-[#cdb6ff]">Pool proof</span>}
+                  <ExternalLink size={15} className="text-white/25" />
+                </div>
               </Link>
             ))}
           </div>
-        )}
-      </section>
-
-      <section className="card overflow-hidden">
-        <div className="border-b border-white/8 px-4 py-3">
-          <h2 className="font-mono text-base font-black text-white">Creator Tokens</h2>
-          <p className="text-xs font-fun text-white/35">Fees are shown in SOL with approximate USDT stable value.</p>
-        </div>
-        {data.tokens.length === 0 ? (
-          <div className="p-8 text-center text-sm font-fun text-white/35">No indexed creator tokens yet.</div>
-        ) : data.tokens.map((token) => (
-          <Link key={token.mint} href={`/token/${token.mint}`} className="grid grid-cols-1 gap-3 border-b border-white/5 px-5 py-4 transition-colors hover:bg-white/5 md:grid-cols-12 md:items-center">
-            <div className="md:col-span-4 flex min-w-0 items-center gap-3">
-              <TokenAvatar src={token.imageUrl} symbol={token.symbol} />
-              <div className="min-w-0">
-                <p className="truncate font-fun font-black text-white">{token.name}</p>
-                <p className="truncate text-xs font-mono text-white/35">{token.symbol} - {shortAddress(token.mint)}</p>
+        </ProfileDetailSection>
               </div>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-[10px] font-fun uppercase text-white/30">Lifetime</p>
-              <p className="font-mono text-[#00ff88]">{formatLamports(token.lifetimeFeesLamports)}</p>
-              <p className="text-xs font-fun text-[#50d8a4]">{usd(token.lifetimeFeesUsdt)}</p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-[10px] font-fun uppercase text-white/30">Generated 24h</p>
-              <p className="font-mono text-[#ffcc7a]">{feeVelocityValue(token.feeVelocityStatus, token.feeVelocity24hLamports)}</p>
-              <p className="text-xs font-fun text-[#ffcc7a]">
-                {token.feeVelocity24hUsdt == null ? feeVelocitySubtitle(token.feeVelocityStatus) : usd(token.feeVelocity24hUsdt)}
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <p className="text-[10px] font-fun uppercase text-white/30">Claimed 24h</p>
-              <p className="font-mono text-white">{formatLamports(token.claimedFees24hLamports)}</p>
-              <p className="text-xs font-fun text-white/40">{usd(token.claimedFees24hUsdt)}</p>
-            </div>
-            <div className="md:col-span-2 flex flex-wrap justify-start gap-2 md:justify-end">
-              {token.creatorProof && <span className="rounded-lg border border-[#00ff88]/20 bg-[#00ff88]/10 px-2 py-1 text-xs font-fun text-[#00ff88]">Creator proof</span>}
-              {token.poolVerified && <span className="rounded-lg border border-[#b48dff]/20 bg-[#b48dff]/10 px-2 py-1 text-xs font-fun text-[#cdb6ff]">Pool proof</span>}
-              <ExternalLink size={15} className="text-white/25" />
-            </div>
-          </Link>
-        ))}
-      </section>
     </div>
   );
 }
