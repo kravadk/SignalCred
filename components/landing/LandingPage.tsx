@@ -176,7 +176,7 @@ export function LandingPage() {
           ))}
         </div>
 
-        <div className="relative z-10 mx-auto grid min-h-[calc(100svh-64px)] max-w-[1520px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
+        <div className="relative z-10 mx-auto grid min-h-[calc(100svh-64px)] max-w-[1520px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.68fr_1.32fr] lg:px-10">
           <div className="landing-rise max-w-4xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#31d99b]/35 bg-[#0d1c19]/82 px-4 py-2 text-sm font-black text-[#69f0bd] shadow-[0_14px_50px_rgba(49,217,155,0.18)] backdrop-blur-xl">
               <ScanLine size={16} />
@@ -219,8 +219,8 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="relative min-h-[640px]">
-            <div className="landing-scanner-shell absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#31d99b]/20 bg-[#31d99b]/[0.025] shadow-[0_0_140px_rgba(49,217,155,0.16)]">
+          <div className="relative min-h-[640px] overflow-visible">
+            <div className="landing-scanner-shell absolute left-[44%] top-1/2 h-[470px] w-[470px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#31d99b]/20 bg-[#31d99b]/[0.025] shadow-[0_0_140px_rgba(49,217,155,0.16)]">
               <div className="landing-scanner-orbit landing-orbit-a" />
               <div className="landing-scanner-orbit landing-orbit-b" />
               <div className="landing-scan-beam" />
@@ -230,7 +230,7 @@ export function LandingPage() {
                   <span className="mt-0.5 block text-[10px] font-black uppercase tracking-[0.12em] text-white/38">{detail}</span>
                 </div>
               ))}
-              <div className="absolute left-1/2 top-1/2 w-[310px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[30px] border border-white/14 bg-[#101524]/88 p-5 shadow-[0_38px_120px_rgba(0,0,0,0.46)] backdrop-blur-2xl">
+              <div className="absolute left-1/2 top-1/2 w-[285px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[30px] border border-white/14 bg-[#101524]/88 p-5 shadow-[0_38px_120px_rgba(0,0,0,0.46)] backdrop-blur-2xl">
                 <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,#31d99b,transparent)]" />
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-[#31d99b]/14 px-3 py-1 text-xs font-black text-[#69f0bd]">SCANNING</span>
@@ -258,7 +258,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="landing-float-panel absolute right-0 top-8 hidden w-80 rounded-[28px] border border-white/10 bg-[#101524]/78 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl xl:block">
+            <div className="landing-float-panel absolute right-0 top-12 hidden w-[300px] rounded-[28px] border border-white/10 bg-[#101524]/78 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl xl:block">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Live terminal</p>
                 <span className="rounded-full bg-[#31d99b]/14 px-3 py-1 text-xs font-black text-[#69f0bd]">proof</span>
@@ -278,9 +278,9 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="landing-float-panel landing-float-delay absolute bottom-6 left-0 hidden w-72 rounded-[28px] border border-white/10 bg-[#0b0a12]/86 p-5 text-white shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-xl xl:block">
+            <div className="landing-float-panel landing-float-delay absolute bottom-10 left-2 hidden w-[260px] rounded-[28px] border border-white/10 bg-[#0b0a12]/86 p-5 text-white shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-xl xl:block">
               <p className="text-sm font-black uppercase tracking-[0.2em] text-white/42">Passport receipt</p>
-              <p className="mt-3 text-3xl font-black">source to fee to social</p>
+              <p className="mt-3 text-2xl font-black">source to fee to social</p>
               <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full w-4/5 rounded-full bg-[linear-gradient(90deg,#31d99b,#ffb84d,#ff5c7a)] landing-progress" />
               </div>
@@ -316,37 +316,37 @@ export function LandingPage() {
           </p>
         </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
-          <div className="landing-tilt-card rounded-[32px] border border-[#ff5c7a]/18 bg-[#1a0c14]/78 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.24)]">
+          <div className="landing-tilt-card landing-before-card rounded-[32px] border border-[#ff5c7a]/45 bg-[#230914]/88 p-6 shadow-[0_24px_90px_rgba(255,92,122,0.16)]">
             <div className="flex items-center gap-3">
               <AlertTriangle className="text-[#ff8ba0]" />
               <div>
-                <p className="font-display text-3xl">Before SignalCred</p>
+                <p className="font-display text-3xl text-[#ff9aad]">Before SignalCred</p>
                 <p className="text-sm font-black text-white/42">One token, too many unknowns.</p>
               </div>
             </div>
             <div className="mt-6 space-y-3">
               {beforeRows.map(([label, value, Icon]) => (
-                <div key={label} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.045] px-4 py-4">
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-[#ff5c7a]/22 bg-[#ff5c7a]/[0.07] px-4 py-4 shadow-[inset_0_0_32px_rgba(255,92,122,0.035)]">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
-                    <p className="mt-1 text-base font-black text-white/70">{value}</p>
+                    <p className="mt-1 text-base font-black text-[#ffd4dd]">{value}</p>
                   </div>
                   <Icon className="text-[#ff8ba0]" size={20} />
                 </div>
               ))}
             </div>
           </div>
-          <div className="landing-tilt-card rounded-[32px] border border-[#31d99b]/22 bg-[#071b16]/78 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.24)]">
+          <div className="landing-tilt-card landing-after-card rounded-[32px] border border-[#31d99b]/50 bg-[#061f18]/88 p-6 shadow-[0_24px_90px_rgba(49,217,155,0.14)]">
             <div className="flex items-center gap-3">
               <ShieldCheck className="text-[#69f0bd]" />
               <div>
-                <p className="font-display text-3xl">After SignalCred</p>
+                <p className="font-display text-3xl text-[#8dffd0]">After SignalCred</p>
                 <p className="text-sm font-black text-white/42">A passport users can verify.</p>
               </div>
             </div>
             <div className="mt-6 space-y-3">
               {afterRows.map(([label, value, Icon]) => (
-                <div key={label} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.045] px-4 py-4">
+                <div key={label} className="flex items-center justify-between rounded-2xl border border-[#31d99b]/24 bg-[#31d99b]/[0.075] px-4 py-4 shadow-[inset_0_0_32px_rgba(49,217,155,0.04)]">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-white/34">{label}</p>
                     <p className="mt-1 text-base font-black text-white">{value}</p>
@@ -376,6 +376,7 @@ export function LandingPage() {
           <div className="landing-pipeline mt-12 grid gap-4 lg:grid-cols-6">
             {pipeline.map(([num, title, body, Icon], index) => (
               <div key={title} className="landing-pipeline-step relative min-h-64 rounded-[28px] border border-white/10 bg-white/[0.055] p-5 shadow-[0_20px_58px_rgba(0,0,0,0.2)] backdrop-blur-xl" style={{ animationDelay: `${index * 90}ms` }}>
+                <span className="landing-pipeline-ping" style={{ animationDelay: `${index * 0.42}s` }} />
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs font-black text-white/34">{num}</span>
                   <Icon size={22} className="text-[#69f0bd]" />
@@ -415,22 +416,44 @@ export function LandingPage() {
           </div>
         </div>
         <div className="rounded-[34px] border border-white/12 bg-white/[0.08] p-4 shadow-[0_34px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-          <div className="relative overflow-hidden rounded-[26px] border border-white/12 bg-[#0b0d18] p-6 text-white">
+          <div className="landing-demo-console relative overflow-hidden rounded-[26px] border border-white/12 bg-[#0b0d18] p-6 text-white">
             <div className="absolute inset-x-0 top-0 h-1 landing-gradient-run" style={{ background: `linear-gradient(90deg, ${demo.accent}, #55d6ff, #ff5c7a)` }} />
+            <div className="pointer-events-none absolute right-[-80px] top-[-80px] h-56 w-56 rounded-full opacity-30 blur-3xl" style={{ background: demo.accent }} />
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-mono text-xs font-black uppercase tracking-[0.22em] text-white/36">{activeDemo}</p>
                 <h3 className="mt-2 font-display text-4xl leading-tight">{demo.title}</h3>
               </div>
-              <Activity className="shrink-0" style={{ color: demo.accent }} />
+              <div className="landing-demo-pulse flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.055]">
+                <Activity style={{ color: demo.accent }} />
+              </div>
             </div>
-            <div className="mt-8 grid gap-3">
-              {demo.rows.map(([label, value], index) => (
-                <div key={label} className="landing-terminal-line flex items-center justify-between rounded-2xl border border-white/10 bg-[#07070c] px-4 py-4" style={{ animationDelay: `${index * 90}ms` }}>
-                  <span className="font-mono text-xs font-black uppercase tracking-[0.18em] text-white/36">{label}</span>
-                  <span className="text-sm font-black text-white">{value}</span>
+            <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_220px]">
+              <div className="grid gap-3">
+                {demo.rows.map(([label, value], index) => (
+                  <div key={label} className="landing-terminal-line flex items-center justify-between rounded-2xl border border-white/10 bg-[#07070c] px-4 py-4" style={{ animationDelay: `${index * 90}ms` }}>
+                    <span className="font-mono text-xs font-black uppercase tracking-[0.18em] text-white/36">{label}</span>
+                    <span className="text-sm font-black text-white">{value}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="landing-mini-passport rounded-[24px] border border-white/10 bg-[#07070c]/82 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-white/34">passport</span>
+                  <span className="rounded-full bg-[#31d99b]/14 px-2 py-1 text-[10px] font-black text-[#69f0bd]">live</span>
                 </div>
-              ))}
+                <div className="mt-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#31d99b,#55d6ff,#a78bfa)] text-3xl font-black text-[#07070c]">
+                  S
+                </div>
+                <div className="mt-5 space-y-2">
+                  {["source", "fees", "social"].map((item, index) => (
+                    <div key={item} className="flex items-center justify-between text-xs font-black">
+                      <span className="text-white/42">{item}</span>
+                      <span style={{ color: index === 1 ? "#ffcf7a" : "#69f0bd" }}>{index === 1 ? "warm" : "ok"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.18em] text-white/42">
