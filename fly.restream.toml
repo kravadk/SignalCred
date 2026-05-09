@@ -1,0 +1,16 @@
+app = "bagspulse-restream-worker"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile.restream-worker"
+
+[env]
+  BAGS_RESTREAM_URL = "wss://restream.bags.fm"
+
+[processes]
+  app = "npm run worker:restream"
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1

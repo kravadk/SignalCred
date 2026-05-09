@@ -1,0 +1,23 @@
+name: SignalCred Fee Snapshots
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate required secrets
+        run: |
+          test -n "${{ secrets.SIGNALCRED_URL }}" || (echo "SIGNALCRED_URL secret is missing" && exit 1)
+          test -n "${{ secrets.AUTOMATION_SECRET }}" || (echo "AUTOMATION_SECRET secret is missing" && exit 1)
+
+      - name: Record hourly Bags fee snapshots
+        run: |
+          set -euo pipefail
+          curl --fail-with-body -X POST "${{ secrets.SIGNALCRED_URL }}/api/fees/snapshots?limit=120" \
+            -H "x-automation-secret: ${{ secrets.AUTOMATION_SECRET }}" \
+            -H "content-type: application/json"

@@ -1,0 +1,43 @@
+name: SignalCred Production Health
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Validate required URL
+        run: |
+          test -n "${{ secrets.SIGNALCRED_URL }}" || (echo "SIGNALCRED_URL secret is missing" && exit 1)
+
+      - name: Check core production endpoints
+        run: |
+          set -euo pipefail
+          BASE="${{ secrets.SIGNALCRED_URL }}"
+          curl --fail-with-body "$BASE/api/health"
+          curl --fail-with-body "$BASE/api/grant/status"
+          curl --fail-with-body "$BASE/api/bags/live"
+          curl --fail-with-body "$BASE/api/trust-signals/live"
+
+      - name: Check grant status policy fields
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const base = process.env.SIGNALCRED_URL;
+          const res = await fetch(`${base}/api/grant/status`);
+          if (!res.ok) throw new Error(`grant status ${res.status}`);
+          const data = await res.json();
+          const failures = [];
+          if (!data.noFakeData) failures.push("noFakeData=false");
+          if (!data.policies?.serverOnlyKeys) failures.push("serverOnlyKeys=false");
+          if (!data.policies?.rateLimits) failures.push("rateLimits=false");
+          if (!data.publicApi?.tokenTrust) failures.push("public token trust API not ready");
+          if (failures.length) throw new Error(failures.join(", "));
+          console.log("grant status policy fields ok");
+          NODE
+        env:
+          SIGNALCRED_URL: ${{ secrets.SIGNALCRED_URL }}
