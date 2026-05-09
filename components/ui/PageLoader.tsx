@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const LETTERS = "SIGNALCRED".split("");
@@ -12,6 +13,16 @@ const STARS = Array.from({ length: 80 }, (_, i) => ({
   delay: (i * 0.17) % 3.5,
   duration: 1.5 + (i % 5) * 0.4,
 }));
+
+const PROOF_CHIPS = [
+  "Bags source",
+  "Pool proof",
+  "Creator proof",
+  "Fee loop",
+  "Claim receipt",
+  "Social proof",
+  "USDT proof",
+] as const;
 
 export function PageLoader({ onDone }: { onDone?: () => void }) {
   const [progress, setProgress] = useState(0);
@@ -53,7 +64,7 @@ export function PageLoader({ onDone }: { onDone?: () => void }) {
     <div
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
       style={{
-        background: "radial-gradient(ellipse at 40% 30%, #3f1d72 0%, #291153 50%, #0e0520 100%)",
+        background: "radial-gradient(circle at 50% 40%, rgba(0,132,255,0.34) 0%, rgba(7,44,107,0.28) 26%, rgba(5,8,18,0.98) 66%, #02030a 100%)",
         transition: "opacity 0.4s ease",
         opacity: progress >= 100 ? 0 : 1,
       }}
@@ -80,39 +91,28 @@ export function PageLoader({ onDone }: { onDone?: () => void }) {
         }}
       />
 
-      <div
-        className="absolute h-3 w-16 rounded-full"
-        style={{
-          top: "20%",
-          background: "linear-gradient(90deg, transparent, #ff8a4d, #fff2b8)",
-          boxShadow: "0 0 24px rgba(255,138,77,0.75)",
-          animation: "rocket-fly 2.4s 0.3s ease-in-out both",
-          zIndex: 2,
-        }}
-      />
-
-      <div className="relative mb-8">
-        <div
-          className="absolute inset-[-24px] rounded-full border border-purple-soft/20"
-          style={{ animation: "spin-slow 8s linear infinite" }}
-        >
-          <div
-            className="absolute top-0 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green"
-            style={{ boxShadow: "0 0 8px #26aa68" }}
+      <div className="signal-loader-stage relative mb-8 grid place-items-center">
+        <div className="signal-loader-halo signal-loader-halo-a" />
+        <div className="signal-loader-halo signal-loader-halo-b" />
+        <div className="signal-loader-scan" />
+        <div className="signal-loader-orbit">
+          {PROOF_CHIPS.map((chip, index) => (
+            <span
+              key={chip}
+              className="signal-loader-chip"
+              style={{ "--chip-index": index } as CSSProperties}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+        <div className="signal-loader-logo-wrap">
+          <img
+            src="/signalcred-logo-512.png"
+            alt="SignalCred logo"
+            className="signal-loader-logo"
           />
         </div>
-
-        <div
-          style={{
-            width: 72,
-            height: 92,
-            borderRadius: "50% 50% 46% 46%",
-            background:
-              "radial-gradient(ellipse at 56% 31%, #ffeeb9 0 24%, transparent 25%), linear-gradient(135deg, #ff364f 0%, #ff6b43 78%)",
-            boxShadow: "0 0 0 0 rgba(255,91,81,0)",
-            animation: "pulse-glow-pink 1.5s ease-in-out infinite",
-          }}
-        />
       </div>
 
       <div className="mb-8 flex items-center gap-0.5" style={{ perspective: "400px" }}>
@@ -133,22 +133,22 @@ export function PageLoader({ onDone }: { onDone?: () => void }) {
       </div>
 
       <p
-        className="mb-10 text-sm font-fun uppercase tracking-widest text-white/40"
+        className="mb-10 text-center text-sm font-fun uppercase tracking-widest text-white/52"
         style={{
           animation: lettersReady ? "fade-in-up 0.6s 0.8s ease both" : "none",
           opacity: lettersReady ? undefined : 0,
         }}
       >
-        Preparing SignalCred trust layer
+        Launching verified trust orbit
       </p>
 
-      <div className="h-1 w-64 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.1)" }}>
+      <div className="h-1.5 w-72 overflow-hidden rounded-full border border-white/10" style={{ background: "rgba(255,255,255,0.08)" }}>
         <div
           className="h-full rounded-full"
           style={{
             width: `${progress}%`,
-            background: "linear-gradient(90deg, #7a55c6, #ff6a84, #26aa68)",
-            boxShadow: "0 0 12px rgba(122,85,198,0.8)",
+            background: "linear-gradient(90deg, #006dff, #20d2ff, #ffd23f, #2fffb2)",
+            boxShadow: "0 0 18px rgba(32,210,255,0.8)",
             backgroundSize: "200% 100%",
             animation: "gradient-shift 2s ease infinite",
             transition: "width 0.05s linear",
@@ -158,10 +158,10 @@ export function PageLoader({ onDone }: { onDone?: () => void }) {
       <p className="mt-3 text-xs font-fun tabular-nums text-white/20">{progress}%</p>
 
       <div
-        className="absolute bottom-8 text-xs font-fun text-white/20"
+        className="absolute bottom-8 text-xs font-fun text-white/28"
         style={{ animation: "fade-in-up 0.6s 1s ease both", opacity: 0 }}
       >
-        Powered by Bags SDK - Solana Mainnet
+        Bags source {"->"} proof passport {"->"} social trust
       </div>
     </div>
   );

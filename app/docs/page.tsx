@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, DatabaseZap, LayoutGrid, ShieldCheck, Trophy } from "lucide-react";
+import { ArrowRight, CheckCircle2, Code2, DatabaseZap, ExternalLink, LayoutGrid, Lightbulb, ShieldCheck, Sparkles, Trophy, Wrench } from "lucide-react";
+import { dev3packResourceComparison, dev3packResourceGroups } from "@/lib/dev3pack-resources";
 
 export const metadata = { title: "Docs - SignalCred" };
 
@@ -28,6 +29,29 @@ const safeguards = [
   "Wallet signature required for creator-only official updates and fee actions",
   "Launch status requires on-chain verification",
   "Graceful pending states when external data is unavailable",
+];
+
+const resourceFit = [
+  {
+    icon: Sparkles,
+    title: "Solana Vibe Coding Checklist",
+    body: "SignalCred keeps the demo path tight: connect wallet, inspect token, launch, post proof, and verify receipts without hidden setup or fake values.",
+  },
+  {
+    icon: Lightbulb,
+    title: "Product Ideation",
+    body: "The product thesis is not another terminal or alpha bot. It is a trust passport standard for Bags tokens, creators, fees, and social proof.",
+  },
+  {
+    icon: Wrench,
+    title: "Developer Resources",
+    body: "The build is grounded in Solana wallet flows, Bags APIs, public read-only trust APIs, embed widgets, fee snapshot cron, and ReStream worker readiness.",
+  },
+  {
+    icon: Code2,
+    title: "Agent / AI Skills",
+    body: "AI stays bounded: optional summaries and drafting are evidence-backed. Trust scores come from source labels, signatures, fee rows, and explorer links.",
+  },
 ];
 
 export default function DocsPage() {
@@ -91,6 +115,94 @@ export default function DocsPage() {
               <p className="font-black text-white">{name}</p>
               <code className="text-xs text-[#69d99a]">{ref}</code>
               <p className="font-semibold text-white/52">{use}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-[28px] border border-[#5bc4ff]/16 bg-[#071724]/72 p-6">
+        <div className="mb-5 max-w-3xl">
+          <h2 className="font-display text-3xl">Dev3pack Resource Fit</h2>
+          <p className="mt-1 text-sm font-semibold leading-6 text-white/52">
+            The resources page is useful as a checklist: build fast, explain the product clearly, use Solana-native tools, and keep AI/agent features grounded. SignalCred applies that as a submission-readiness layer.
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {resourceFit.map(({ icon: Icon, title, body }) => (
+            <article key={title} className="rounded-2xl border border-white/8 bg-black/18 p-4">
+              <Icon className="mb-4 text-[#8fd8ff]" size={21} />
+              <h3 className="text-sm font-black text-white">{title}</h3>
+              <p className="mt-2 text-xs font-semibold leading-5 text-white/48">{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-[28px] border border-white/10 bg-[#0d101a]/82 p-6">
+        <div className="mb-5 max-w-4xl">
+          <h2 className="font-display text-3xl">External Resource Comparison</h2>
+          <p className="mt-1 text-sm font-semibold leading-6 text-white/52">
+            These are the concrete Dev3pack links mapped against SignalCred. The point is not to copy every tool, but to decide what strengthens the trust-passport product without turning it into a generic AI app, launchpad, or terminal.
+          </p>
+        </div>
+
+        <div className="grid gap-4">
+          {dev3packResourceGroups.map((group) => (
+            <article key={group.category} className="rounded-2xl border border-white/8 bg-black/18 p-4">
+              <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="mb-2 inline-flex rounded-md border border-[#5bc4ff]/18 bg-[#5bc4ff]/8 px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-[#8fd8ff]">
+                    {group.status}
+                  </div>
+                  <h3 className="font-display text-2xl">{group.category}</h3>
+                  <p className="mt-1 max-w-3xl text-xs font-semibold leading-5 text-white/48">{group.thesis}</p>
+                </div>
+                <div className="max-w-md space-y-1.5">
+                  {group.items.map((item) => (
+                    <p key={item} className="flex gap-2 text-[11px] font-semibold leading-4 text-white/45">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#69d99a]" />
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-2 lg:grid-cols-2">
+                {group.resources.map((resource) => (
+                  <a
+                    key={resource.href}
+                    href={resource.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group rounded-xl border border-white/8 bg-white/[0.035] p-3 transition hover:border-[#69d99a]/30 hover:bg-[#69d99a]/[0.055]"
+                  >
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-black text-white">{resource.label}</p>
+                        <p className="mt-1 text-[11px] font-mono text-white/28">{new URL(resource.href).hostname}</p>
+                      </div>
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-mono font-bold uppercase text-white/42 group-hover:text-[#69d99a]">
+                        {resource.status}
+                        <ExternalLink size={11} />
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold leading-5 text-white/48">{resource.fit}</p>
+                    <p className="mt-2 rounded-lg border border-white/6 bg-black/18 px-2 py-2 text-xs font-semibold leading-5 text-[#8fd8ff]/72">
+                      SignalCred: {resource.signalCredUse}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-4 grid gap-2 md:grid-cols-2">
+          {dev3packResourceComparison.map((row) => (
+            <div key={row.takeaway} className="rounded-xl border border-[#69d99a]/12 bg-[#69d99a]/[0.045] p-3">
+              <p className="text-sm font-black text-white">{row.takeaway}</p>
+              <p className="mt-1 text-xs font-semibold leading-5 text-white/45">{row.why}</p>
+              <p className="mt-2 text-xs font-bold leading-5 text-[#69d99a]/80">{row.action}</p>
             </div>
           ))}
         </div>

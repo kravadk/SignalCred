@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
-import { ArrowDownUp, Loader2, CheckCircle2, Zap, AlertTriangle, ExternalLink } from "lucide-react";
+import { ArrowDownUp, Loader2, CheckCircle2, Zap, AlertTriangle, ExternalLink, ShieldCheck, Clock3 } from "lucide-react";
 import { cn, solToLamports } from "@/lib/utils";
 import { SOL_MINT } from "@/lib/constants";
 import { USDT_MINT, usdtToNative, nativeToUsdt } from "@/lib/usdt";
+import { useToast } from "@/components/ui/Toast";
 
 interface TradePanelProps { mint: string; symbol: string; }
 
@@ -23,15 +24,73 @@ type QuoteResponse = {
   quoteResponse?: Record<string, unknown> | null;
   unavailable?: boolean;
   error?: string;
+  errorType?: string;
+  userMessage?: string;
 };
+type SwapPrepareResponse = {
+  tx?: string;
+  tradeId?: string | null;
+  error?: string;
+  errorType?: string;
+  userMessage?: string;
+};
+type TradeHistoryItem = {
+  id: string;
+  inputMint: string | null;
+  outputMint: string | null;
+  inAmount: string | null;
+  outAmount: string | null;
+  priceImpactPct: string | null;
+  txSignature: string | null;
+  explorerHref: string | null;
+  status: "prepared" | "submitted" | "confirmed" | "failed";
+  createdAt: string;
+};
+type StepState = "idle" | "pending" | "success" | "error";
+type TradeStep = { key: string; label: string; detail: string; state: StepState };
 
 const QUICK_SOL = ["0.1", "0.5", "1", "2"];
 const QUICK_USDT = ["5", "10", "50", "100"];
+const DEFAULT_STEPS: TradeStep[] = [
+  { key: "quote", label: "Quote", detail: "Waiting for route", state: "idle" },
+  { key: "route", label: "Server check", detail: "Route not verified yet", state: "idle" },
+  { key: "wallet", label: "Wallet review", detail: "You approve in your wallet", state: "idle" },
+  { key: "chain", label: "On-chain", detail: "Submit and confirm", state: "idle" },
+  { key: "receipt", label: "Receipt", detail: "Save Solscan link", state: "idle" },
+];
+
+function classifyTradeError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error);
+  if (/User rejected|Transaction was rejected|rejected/i.test(raw)) {
+    return { type: "wallet_rejected", message: "Transaction rejected. Nothing changed." };
+  }
+  if (/AccountNotFound|TokenAccountNotFound|InsufficientFunds|insufficient/i.test(raw)) {
+    return { type: "insufficient_funds", message: "Insufficient balance or token account rent. Keep some SOL for network fees and retry." };
+  }
+  if (/blockhash not found|TransactionExpired|expired/i.test(raw)) {
+    return { type: "tx_expired", message: "Transaction expired. Refresh the quote and try again." };
+  }
+  if (/SlippageToleranceExceeded|0x1771|slippage/i.test(raw)) {
+    return { type: "slippage_exceeded", message: "Price moved beyond slippage. Refresh the quote or use a smaller amount." };
+  }
+  if (/quote_drift|drifted/i.test(raw)) {
+    return { type: "quote_drift", message: "Quote moved before signing. Refresh and try again." };
+  }
+  if (/rate_limit|Rate limit/i.test(raw)) {
+    return { type: "rate_limit", message: "Too many requests. Wait a moment and try again." };
+  }
+  if (/unsupported mint pair|No route|Could not re-quote|quote_unavailable/i.test(raw)) {
+    return { type: "quote_unavailable", message: "No safe route is available right now. Try SOL/USDT mode or a smaller amount." };
+  }
+  return { type: "trade_error", message: raw.slice(0, 180) };
+}
 
 export function TradePanel({ mint, symbol }: TradePanelProps) {
   const { publicKey, sendTransaction, connected } = useWallet();
   const { connection } = useConnection();
   const { setVisible } = useWalletModal();
+  const { push } = useToast();
+  const lastQuoteToastKey = useRef("");
 
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [currency, setCurrency] = useState<Currency>("SOL");
@@ -46,6 +105,53 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [tokenDecimals, setTokenDecimals] = useState<number>(6);
+  const [tradeSteps, setTradeSteps] = useState<TradeStep[]>(DEFAULT_STEPS);
+  const [tradeHistory, setTradeHistory] = useState<TradeHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const setStep = useCallback((key: string, state: StepState, detail: string) => {
+    setTradeSteps((prev) => prev.map((step) => step.key === key ? { ...step, state, detail } : step));
+  }, []);
+
+  const resetSteps = useCallback(() => {
+    setTradeSteps(DEFAULT_STEPS);
+  }, []);
+
+  const loadTradeHistory = useCallback(async () => {
+    const wallet = publicKey?.toBase58();
+    if (!wallet) {
+      setTradeHistory([]);
+      return;
+    }
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/trade/history?wallet=${wallet}`, { headers: { "x-wallet": wallet } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.userMessage || data.error || "History unavailable");
+      setTradeHistory(Array.isArray(data.history) ? data.history : []);
+    } catch {
+      setTradeHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [publicKey]);
+
+  const saveReceipt = useCallback(async (tradeId: string | null | undefined, signature: string) => {
+    const wallet = publicKey?.toBase58();
+    if (!wallet || !tradeId) {
+      setStep("receipt", "error", "Receipt id missing");
+      return;
+    }
+    const res = await fetch("/api/trade/receipt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-wallet": wallet },
+      body: JSON.stringify({ tradeId, txSignature: signature }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.userMessage || data.error || "Receipt save failed");
+    }
+  }, [publicKey, setStep]);
 
   // Reset amount when side or currency switches
   useEffect(() => {
@@ -53,7 +159,12 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
       setAmount(currency === "USDT" ? "10" : "0.1");
     }
     setQuote(null);
+    resetSteps();
   }, [side, currency]);
+
+  useEffect(() => {
+    loadTradeHistory();
+  }, [loadTradeHistory]);
 
   // Wallet balances and mint decimals are read server-side so RPC credentials never reach the browser.
   useEffect(() => {
@@ -110,6 +221,7 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
     if (!val || val <= 0 || !mint) return;
     setQuoteLoading(true);
     setError(null);
+    setStep("quote", "pending", "Requesting Bags quote");
     try {
       let inputMint: string;
       let outputMint: string;
@@ -129,20 +241,33 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
         `/api/trade/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${nativeAmount}`
       );
       const data = await res.json() as QuoteResponse;
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.userMessage || data.error);
       if (data.unavailable || !data.quoteResponse) {
-        setError(data.error || "Quote unavailable for this pair right now");
+        const message = data.userMessage || data.error || "Quote unavailable for this pair right now";
+        setError(message);
         setQuote(null);
+        setStep("quote", "error", message);
+        push({ kind: "error", text: `Quote failed: ${message}` });
         return;
       }
       setQuote(data.quoteResponse);
+      setStep("quote", "success", "Quote ready");
+      setStep("route", "idle", "Server check runs before wallet opens");
+      const quoteToastKey = `${inputMint}:${outputMint}:${nativeAmount}:${side}:${currency}`;
+      if (lastQuoteToastKey.current !== quoteToastKey) {
+        lastQuoteToastKey.current = quoteToastKey;
+        push({ kind: "success", text: "Quote ready. Review route before signing." });
+      }
     } catch (e) {
-      setError(String(e));
+      const mapped = classifyTradeError(e);
+      setError(mapped.message);
+      setStep("quote", "error", mapped.message);
+      push({ kind: "error", text: `Quote error (${mapped.type}): ${mapped.message}` });
       setQuote(null);
     } finally {
       setQuoteLoading(false);
     }
-  }, [amount, side, currency, mint, tokenDecimals]);
+  }, [amount, side, currency, mint, tokenDecimals, setStep, push]);
 
   useEffect(() => {
     const t = setTimeout(fetchQuote, 700);
@@ -150,10 +275,19 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
   }, [fetchQuote]);
 
   const handleSwap = async () => {
-    if (!publicKey) { setVisible(true); return; }
+    if (!publicKey) {
+      push({ kind: "info", text: "Connect wallet to review transaction. SignalCred never asks for your seed phrase." });
+      setVisible(true);
+      return;
+    }
     if (!quote) return;
     setSwapping(true);
     setError(null);
+    setStep("route", "pending", "Server re-checking quote");
+    setStep("wallet", "idle", "Wallet opens after server check");
+    setStep("chain", "idle", "Waiting for wallet signature");
+    setStep("receipt", "idle", "Receipt saved after confirmation");
+    let stage: "route" | "wallet" | "chain" | "receipt" = "route";
     try {
       const outputMint = side === "buy" ? mint
         : currency === "USDT" ? USDT_MINT : SOL_MINT;
@@ -163,28 +297,40 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
         headers: { "Content-Type": "application/json", "x-wallet": publicKey.toBase58() },
         body: JSON.stringify({ quoteResponse: quote, outputMint }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await res.json() as SwapPrepareResponse;
+      if (!res.ok || !data.tx) throw new Error(data.userMessage || data.error || "Swap preparation failed");
+      setStep("route", "success", "Route verified server-side");
+      push({ kind: "success", text: "Route verified. Wallet approval is next." });
+
+      stage = "wallet";
       const tx = VersionedTransaction.deserialize(Buffer.from(data.tx, "base64"));
+      setStep("wallet", "pending", "Review amount, mint, and domain in wallet");
+      push({ kind: "info", text: "Wallet prompt is expected. Verify token, amount, and route before approving." });
       const sig = await sendTransaction(tx, connection);
+      setStep("wallet", "success", "Wallet signed and submitted");
+      setStep("chain", "pending", "Waiting for Solana confirmation");
+      stage = "chain";
+      push({ kind: "info", text: "Transaction submitted. Waiting for confirmation." });
       await connection.confirmTransaction(sig, "confirmed");
+      setStep("chain", "success", "Confirmed on Solana");
       setTxSig(sig);
+
+      stage = "receipt";
+      setStep("receipt", "pending", "Saving SignalCred receipt");
+      await saveReceipt(data.tradeId, sig);
+      setStep("receipt", "success", "Receipt saved with Solscan link");
+      await loadTradeHistory();
       setDone(true);
+      push({ kind: "success", text: "Swap confirmed. Receipt saved with Solscan link." });
       setTimeout(() => setDone(false), 3000);
     } catch (e) {
-      const raw = String(e);
-      // Friendlier message for the most common wallet errors
-      let msg = raw;
-      if (/AccountNotFound|TokenAccountNotFound|InsufficientFunds.*account/i.test(raw)) {
-        msg = "Looks like you don't have a token account yet. Make sure your wallet has at least 0.01 SOL to cover ATA rent, then retry.";
-      } else if (/User rejected|Transaction was rejected/i.test(raw)) {
-        msg = "Transaction rejected in wallet. Nothing was changed.";
-      } else if (/blockhash not found|TransactionExpired/i.test(raw)) {
-        msg = "Network was slow - refresh the quote and try again";
-      } else if (/SlippageToleranceExceeded|0x1771/i.test(raw)) {
-        msg = "Price moved beyond your slippage. Increase slippage or refresh quote.";
-      } else if (/unsupported mint pair|No route|Could not re-quote/i.test(raw)) {
-        msg = "No route found for this pair right now. Refresh the quote or try SOL mode.";
+      const mapped = classifyTradeError(e);
+      const msg = mapped.message;
+      setStep(stage, "error", msg);
+      if (stage === "receipt" && txSig) {
+        push({ kind: "error", text: `Receipt save failed, but transaction may be confirmed. Check Solscan.` });
+      } else {
+        push({ kind: "error", text: `${mapped.type}: ${msg}` });
       }
       setError(msg.slice(0, 200));
     } finally {
@@ -208,6 +354,23 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
     }
     if (currency === "USDT") return `${nativeToUsdt(outAmount).toFixed(2)} USDT`;
     return `${(outAmount / 1e9).toFixed(5)} SOL`;
+  };
+
+  const formatNativeAmount = (mintAddress: string | null, raw: string | null) => {
+    const value = Number(raw ?? 0);
+    if (!Number.isFinite(value) || value <= 0) return "-";
+    if (mintAddress === SOL_MINT) return `${(value / 1e9).toFixed(4)} SOL`;
+    if (mintAddress === USDT_MINT) return `${nativeToUsdt(value).toFixed(2)} USDT`;
+    return `${(value / Math.pow(10, tokenDecimals)).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${symbol}`;
+  };
+
+  const historySide = (item: TradeHistoryItem) => item.outputMint === mint ? "buy" : "sell";
+
+  const stepTone = (state: StepState) => {
+    if (state === "success") return "border-[#00ff88]/25 bg-[#00ff88]/8 text-[#69d99a]";
+    if (state === "pending") return "border-[#ffbd4a]/25 bg-[#ffbd4a]/8 text-[#ffd071]";
+    if (state === "error") return "border-[#ff6a84]/30 bg-[#ff6a84]/10 text-[#ff8da1]";
+    return "border-white/8 bg-white/[0.03] text-white/38";
   };
 
   const buyGradient = "linear-gradient(135deg, #26aa68, #69d99a)";
@@ -441,6 +604,35 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
           )}
         </div>
 
+        <div className="mb-3 rounded-2xl border border-[#00ff88]/12 bg-[#00ff88]/[0.04] p-3">
+          <div className="mb-2 flex items-center gap-2 text-xs font-body font-black text-[#69d99a]">
+            <ShieldCheck size={14} />
+            Safe signing
+          </div>
+          <div className="grid grid-cols-2 gap-1.5 text-[11px] font-body font-semibold text-white/58">
+            {["No custody", "No seed phrase", "Server re-checks route", "You approve in wallet", "Receipt after signature"].map((item) => (
+              <span key={item} className="rounded-lg bg-white/[0.04] px-2 py-1">{item}</span>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] font-body font-semibold leading-snug text-white/45">
+            Wallet trust prompt is expected. Verify the domain, amount, token mint, and route before approving.
+          </p>
+        </div>
+
+        <div className="mb-4 space-y-1.5">
+          {tradeSteps.map((step, index) => (
+            <div key={step.key} className={cn("flex items-center gap-2 rounded-xl border px-2.5 py-2", stepTone(step.state))}>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-black/20 text-[10px] font-mono font-black">
+                {step.state === "success" ? "✓" : step.state === "pending" ? "…" : step.state === "error" ? "!" : index + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] font-body font-black uppercase tracking-[0.08em]">{step.label}</div>
+                <div className="truncate text-[11px] font-body font-semibold opacity-80">{step.detail}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {error && (
           <p className="text-[#ff6a84] text-xs font-body font-semibold text-center mb-3 flex items-center justify-center gap-1">
             <AlertTriangle size={11} /> {error.slice(0, 100)}
@@ -495,6 +687,64 @@ export function TradePanel({ mint, symbol }: TradePanelProps) {
             View transaction <ExternalLink size={12} />
           </a>
         )}
+
+        <div className="mt-4 rounded-2xl border border-white/8 bg-black/15 p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-xs font-body font-black text-white">
+              <Clock3 size={13} className="text-white/45" />
+              Recent trades
+            </div>
+            {connected && (
+              <button
+                type="button"
+                onClick={loadTradeHistory}
+                className="text-[11px] font-body font-black text-[#b48dff] hover:text-white"
+              >
+                Refresh
+              </button>
+            )}
+          </div>
+          {!connected ? (
+            <p className="text-[11px] font-body font-semibold leading-snug text-white/45">
+              Connect wallet to view your SignalCred trade receipts.
+            </p>
+          ) : historyLoading ? (
+            <p className="text-[11px] font-body font-semibold text-white/45">Loading trade receipts...</p>
+          ) : tradeHistory.length === 0 ? (
+            <p className="text-[11px] font-body font-semibold text-white/45">No SignalCred trade receipts yet.</p>
+          ) : (
+            <div className="space-y-1.5">
+              {tradeHistory.slice(0, 4).map((item) => {
+                const rowSide = historySide(item);
+                return (
+                  <div key={item.id} className="rounded-xl bg-white/[0.035] px-2.5 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={cn("text-[11px] font-body font-black uppercase", rowSide === "buy" ? "text-[#69d99a]" : "text-[#ff8da1]")}>
+                        {rowSide}
+                      </span>
+                      <span className="text-[11px] font-body font-bold text-white/45">{item.status}</span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-2 text-[11px] font-body font-semibold text-white/62">
+                      <span className="truncate">{formatNativeAmount(item.inputMint, item.inAmount)}</span>
+                      <span className="text-white/28">→</span>
+                      <span className="truncate text-right">{formatNativeAmount(item.outputMint, item.outAmount)}</span>
+                    </div>
+                    {item.explorerHref && (
+                      <a
+                        href={item.explorerHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-body font-black text-[#69d99a] hover:text-white"
+                      >
+                        Solscan receipt <ExternalLink size={10} />
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

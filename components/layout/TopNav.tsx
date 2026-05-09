@@ -40,13 +40,12 @@ export function TopNav() {
       <div className="w-full min-h-[52px] flex items-center gap-3 px-3 sm:px-4 xl:px-5">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-          <div className="relative">
-            <div style={{
-              width: 24, height: 30,
-              borderRadius: "50% 50% 46% 46%",
-              background: "radial-gradient(ellipse at 56% 31%, #ffeeb9 0 24%, transparent 25%), linear-gradient(135deg, #ff364f 0%, #ff6b43 78%)",
-              boxShadow: "0 0 12px rgba(255,91,81,0.34)",
-            }} />
+          <div className="relative grid h-9 w-9 place-items-center overflow-hidden rounded-xl shadow-[0_0_18px_rgba(0,132,255,0.24)] ring-1 ring-white/10 transition group-hover:shadow-[0_0_26px_rgba(0,132,255,0.42)]">
+            <img
+              src="/signalcred-logo-256.png"
+              alt="SignalCred"
+              className="h-full w-full object-cover"
+            />
           </div>
           <span className="hidden font-display text-base font-black tracking-tight text-white sm:block"
             style={{ textShadow: "0 2px 12px rgba(0,0,0,0.32)" }}>

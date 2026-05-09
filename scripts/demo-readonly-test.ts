@@ -933,9 +933,59 @@ async function run() {
     body: JSON.stringify({ mint: selectedMint, symbol: selectedSymbol || "BAGS" }),
   });
   await checkStatus("trade quote without params rejects with 400", "/api/trade/quote", 400);
+  await check("trade quote error includes errorType", async () => {
+    const { res, body } = await json("/api/trade/quote");
+    return res.status === 400 && body.errorType === "missing_quote_params";
+  });
   await checkStatus("swap without wallet rejects with 401", "/api/trade/swap", 401, {
     method: "POST",
     body: JSON.stringify({ quoteResponse: {} }),
+  });
+  await check("swap without wallet returns invalid_wallet", async () => {
+    const { res, body } = await json("/api/trade/swap", {
+      method: "POST",
+      body: JSON.stringify({ quoteResponse: {} }),
+    });
+    return res.status === 401 && body.errorType === "invalid_wallet";
+  });
+  await check("swap forged outputMint is blocked before signing", async () => {
+    const { res, body } = await json("/api/trade/swap", {
+      method: "POST",
+      headers: { "x-wallet": DUMMY_WALLET },
+      body: JSON.stringify({
+        outputMint: "11111111111111111111111111111111",
+        quoteResponse: {
+          inputMint: DUMMY_WALLET,
+          outputMint: selectedMint,
+          inAmount: "1000",
+          outAmount: "1",
+          slippageBps: 100,
+        },
+      }),
+    });
+    return res.status === 400 && body.errorType === "quote_rebinding_blocked";
+  });
+  await checkStatus("trade receipt rejects without wallet", "/api/trade/receipt", 401, {
+    method: "POST",
+    body: JSON.stringify({ tradeId: FAKE_POST_ID, txSignature: "3".repeat(88) }),
+  });
+  await check("trade receipt rejects invalid signature", async () => {
+    const { res, body } = await json("/api/trade/receipt", {
+      method: "POST",
+      headers: { "x-wallet": DUMMY_WALLET },
+      body: JSON.stringify({ tradeId: FAKE_POST_ID, txSignature: "bad-signature" }),
+    });
+    return res.status === 400 && body.errorType === "invalid_signature";
+  });
+  await check("trade history invalid wallet rejects", async () => {
+    const { res, body } = await json("/api/trade/history?wallet=bad-wallet");
+    return res.status === 400 && body.errorType === "invalid_wallet";
+  });
+  await check("trade history valid wallet returns structured history", async () => {
+    const { res, body } = await json(`/api/trade/history?wallet=${DUMMY_WALLET}`, {
+      headers: { "x-wallet": DUMMY_WALLET },
+    });
+    return res.status === 200 && Array.isArray(body.history) && body.noFakeData === true;
   });
   await checkStatus("launch without wallet rejects with 401", "/api/tokens/launch", 401, {
     method: "POST",

@@ -7,6 +7,7 @@ import {
   ArrowRight,
   BadgeCheck,
   DatabaseZap,
+  ExternalLink,
   FileCheck2,
   Link2,
   Loader2,
@@ -69,6 +70,27 @@ type GrantStatus = {
     embedHref: string;
     cacheSeconds: number;
     readOnly: boolean;
+  };
+  builderResources: {
+    source: string;
+    categories: Array<{
+      category: string;
+      thesis: string;
+      status: string;
+      items: string[];
+      resources: Array<{
+        label: string;
+        href: string;
+        fit: string;
+        signalCredUse: string;
+        status: string;
+      }>;
+    }>;
+    comparison: Array<{
+      takeaway: string;
+      why: string;
+      action: string;
+    }>;
   };
   passports: {
     availableCount: number;
@@ -301,6 +323,67 @@ export function GrantStatusDashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+          </section>
+
+          <section className="card p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-[#5bc4ff]/20 bg-[#5bc4ff]/10 px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-[#8fd8ff]">
+                  <DatabaseZap size={13} />
+                  Builder readiness
+                </div>
+                <h2 className="font-display text-2xl text-white">Dev3pack Resource Fit</h2>
+                <p className="mt-1 max-w-3xl text-xs font-body leading-5 text-white/45">
+                  SignalCred maps the resource-page logic into the product: vibe-coded Solana flow, clear product thesis, developer stack, and bounded AI/agent usage.
+                </p>
+              </div>
+              <span className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2 font-mono text-[10px] text-white/35">
+                {data.builderResources.source}
+              </span>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {data.builderResources.categories.map((group) => (
+                <div key={group.category} className="rounded-xl border border-white/8 bg-black/18 p-3">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <p className="text-xs font-mono font-black text-white">{group.category}</p>
+                    <span className="rounded-md border border-[#00ff88]/18 bg-[#00ff88]/8 px-2 py-1 text-[10px] font-mono font-bold text-[#69d99a]">
+                      {group.status}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {group.items.map((item) => (
+                      <div key={item} className="flex gap-2 text-[11px] font-body leading-4 text-white/48">
+                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#5bc4ff]" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 space-y-1.5">
+                    {group.resources.slice(0, 3).map((resource) => (
+                      <a
+                        key={resource.href}
+                        href={resource.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between gap-2 rounded-lg border border-white/6 bg-white/[0.03] px-2 py-1.5 text-[10px] font-mono text-white/40 hover:border-[#69d99a]/20 hover:text-[#69d99a]"
+                      >
+                        <span className="truncate">{resource.label}</span>
+                        <ExternalLink size={11} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 grid gap-2 md:grid-cols-2">
+              {data.builderResources.comparison.map((row) => (
+                <div key={row.takeaway} className="rounded-xl border border-[#69d99a]/10 bg-[#69d99a]/[0.04] p-3">
+                  <p className="text-xs font-mono font-black text-white">{row.takeaway}</p>
+                  <p className="mt-1 text-[11px] font-body leading-4 text-white/42">{row.why}</p>
+                  <p className="mt-2 text-[11px] font-body font-bold leading-4 text-[#69d99a]/70">{row.action}</p>
+                </div>
+              ))}
             </div>
           </section>
 

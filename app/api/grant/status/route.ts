@@ -3,6 +3,7 @@ import { count, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { feeSnapshots, posts, rewardCampaigns, tokens } from "@/db/schema";
 import { getBagsLaunchFeed, getBagsPools } from "@/lib/bags-index";
 import { db } from "@/lib/db";
+import { dev3packResourceComparison, dev3packResourceGroups } from "@/lib/dev3pack-resources";
 import { getRestreamReadiness } from "@/lib/restream";
 
 export const dynamic = "force-dynamic";
@@ -151,6 +152,11 @@ export async function GET() {
       embedHref: "/embed/trust/[mint]",
       cacheSeconds: 60,
       readOnly: true,
+    },
+    builderResources: {
+      source: "Dev3pack Resources mapped into SignalCred product decisions",
+      categories: dev3packResourceGroups,
+      comparison: dev3packResourceComparison,
     },
     passports: {
       availableCount: indexedTokens,

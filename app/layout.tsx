@@ -12,8 +12,9 @@ export const metadata: Metadata = {
   title: "SignalCred - Bags-native launch and trust layer",
   description: "Launch Bags-native tokens with verified creator updates, fee loop evidence, social proof, and USDT campaign context.",
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
+    icon: "/signalcred-logo-64.png",
+    shortcut: "/signalcred-logo-64.png",
+    apple: "/signalcred-logo-256.png",
   },
   openGraph: {
     title: "SignalCred",
