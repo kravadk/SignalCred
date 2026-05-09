@@ -163,8 +163,6 @@ export function LandingPage() {
         <a href="/square">Social Proof</a>
         <a href="/hackathon/status">View Hackathon Status</a>
       </div>
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-1 bg-[linear-gradient(90deg,#ff5c7a,#ffb84d,#31d99b,#55d6ff,#a78bfa)] bg-[length:240%_100%] opacity-90 landing-gradient-run" />
-
       <section className="relative isolate min-h-[calc(100svh-64px)] overflow-hidden border-b border-white/10 bg-[#080912]">
         <HeroTrustScene />
         <div className="absolute inset-0 pointer-events-none landing-aurora" />
@@ -201,10 +199,10 @@ export function LandingPage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/launch"
-                className="group landing-magnetic inline-flex min-h-[52px] items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[linear-gradient(135deg,#ff4f6d,#ff8b45)] px-6 text-base font-black leading-none text-white shadow-[0_22px_54px_rgba(255,79,109,0.28)] transition hover:translate-y-[-2px] hover:shadow-[0_28px_72px_rgba(255,92,122,0.36)]"
+                className="group landing-magnetic inline-flex min-h-[52px] min-w-[220px] items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[linear-gradient(135deg,#ff4f6d,#ff8b45)] px-7 text-base font-black leading-none text-white shadow-[0_22px_54px_rgba(255,79,109,0.28)] transition hover:translate-y-[-2px] hover:shadow-[0_28px_72px_rgba(255,92,122,0.36)]"
               >
-                <span className="leading-none">Launch verified token</span>
-                <ArrowRight size={18} className="shrink-0 transition group-hover:translate-x-1" />
+                <span className="relative z-10 leading-none">Launch verified token</span>
+                <ArrowRight size={18} className="relative z-10 shrink-0 transition group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/token"
@@ -248,7 +246,9 @@ export function LandingPage() {
                 </div>
                 <div className="mt-5 rounded-2xl border border-white/10 bg-[#07070c] p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#ff5c7a,#ffb84d)] text-xl font-black">S</div>
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#0879ff] shadow-[0_12px_34px_rgba(0,119,255,0.28)]">
+                      <img src="/signalcred-logo-256.png" alt="SignalCred" className="h-full w-full object-cover" loading="lazy" />
+                    </div>
                     <div>
                       <p className="font-display text-2xl leading-none">Signal Mint</p>
                       <p className="mt-1 font-mono text-xs text-white/40">$SIGNAL / SOL</p>

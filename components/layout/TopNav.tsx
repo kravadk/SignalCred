@@ -33,7 +33,9 @@ export function TopNav() {
       style={{
         background: scrolled ? "rgba(9, 9, 15, 0.94)" : "rgba(9, 9, 15, 0.82)",
         backdropFilter: "blur(14px)",
+        borderTop: "none",
         borderBottom: "1px solid rgba(255,255,255,0.08)",
+        outline: "none",
         boxShadow: scrolled ? "0 8px 26px rgba(0,0,0,0.28)" : "none",
       }}
     >
