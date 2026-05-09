@@ -11,18 +11,38 @@ function requireBagsKey(): string {
   const k = process.env.BAGS_API_KEY;
   if (!k) {
     throw new Error(
-      "BAGS_API_KEY is not set. Add it to .env.local from https://bags.fm developer settings.",
+      "BAGS_API_KEY is not set. Configure it in the deployment environment from https://bags.fm developer settings.",
     );
   }
   return k;
 }
-const bagsApiKey: string = requireBagsKey();
 
-export const sdk = new BagsSDK(
-  bagsApiKey,
-  connection,
-  "processed"
-);
+function createBagsSdk() {
+  return new BagsSDK(
+    requireBagsKey(),
+    connection,
+    "processed"
+  );
+}
+
+type BagsClient = ReturnType<typeof createBagsSdk>;
+
+let cachedSdk: BagsClient | null = null;
+
+export function getBagsSdk() {
+  cachedSdk ??= createBagsSdk();
+  return cachedSdk;
+}
+
+export function isBagsApiConfigured() {
+  return Boolean(process.env.BAGS_API_KEY);
+}
+
+export const sdk = new Proxy({} as BagsClient, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getBagsSdk(), prop, receiver);
+  },
+});
 
 export { connection };
 
@@ -36,7 +56,7 @@ export async function bagsRequest<T>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": bagsApiKey,
+      "x-api-key": requireBagsKey(),
       ...options.headers,
     },
   });
@@ -65,7 +85,7 @@ export async function createTokenInfoAndMetadata(params: {
   twitterUrl?: string;
   telegramUrl?: string;
 }): Promise<{ tokenMint: string; tokenMetadata: string }> {
-  const result = await sdk.tokenLaunch.createTokenInfoAndMetadata({
+  const result = await getBagsSdk().tokenLaunch.createTokenInfoAndMetadata({
     name: params.name,
     symbol: params.symbol,
     description: params.description,
@@ -83,7 +103,7 @@ export async function getTradeQuote(params: {
   amount: number;
   slippageBps?: number;
 }): Promise<TradeQuoteResponse> {
-  return sdk.trade.getQuote({
+  return getBagsSdk().trade.getQuote({
     inputMint: new PublicKey(params.inputMint),
     outputMint: new PublicKey(params.outputMint),
     amount: params.amount,
@@ -95,7 +115,7 @@ export async function createSwapTx(
   quote: TradeQuoteResponse,
   userPublicKey: PublicKey
 ): Promise<VersionedTransaction> {
-  const result = await sdk.trade.createSwapTransaction({
+  const result = await getBagsSdk().trade.createSwapTransaction({
     quoteResponse: quote,
     userPublicKey,
   });
@@ -103,14 +123,14 @@ export async function createSwapTx(
 }
 
 export async function getClaimablePositions(wallet: string) {
-  return sdk.fee.getAllClaimablePositions(new PublicKey(wallet));
+  return getBagsSdk().fee.getAllClaimablePositions(new PublicKey(wallet));
 }
 
 export async function getClaimTxsForToken(
   wallet: string,
   tokenMint: string
 ): Promise<Transaction[]> {
-  return sdk.fee.getClaimTransactions(
+  return getBagsSdk().fee.getClaimTransactions(
     new PublicKey(wallet),
     new PublicKey(tokenMint)
   );
