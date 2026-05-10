@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { CreatorReliabilityScore } from "@/components/profile/CreatorReliabilityScore";
 import { LinkedTokenNetwork } from "@/components/profile/LinkedTokenNetwork";
+import { PrivateQvacReview } from "@/components/qvac/PrivateQvacReview";
 import { SuspiciousPatternPanel } from "@/components/profile/SuspiciousPatternPanel";
 
 type GraphResponse = {
@@ -119,6 +120,9 @@ export function CreatorTrustGraph({ wallet }: { wallet: string }) {
                 <p className="mt-1 truncate font-mono text-2xl font-black tabular-nums text-white">{String(value)}</p>
               </div>
             ))}
+          </div>
+          <div className="mt-3">
+            <PrivateQvacReview creatorGraph={data} mode="creator" compact />
           </div>
         </div>
       </div>

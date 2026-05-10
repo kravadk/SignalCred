@@ -153,6 +153,18 @@ export async function GET() {
       cacheSeconds: 60,
       readOnly: true,
     },
+    qvac: {
+      enabled: process.env.QVAC_ENABLED === "true",
+      serviceStatus: process.env.QVAC_SERVICE_URL ? "configured" : "optional",
+      publicGateway: "/api/qvac",
+      privateReview: true,
+      cloudFallback: false,
+      runtime: "QVAC service behind SignalCred API gateway",
+      capabilities: ["private LLM trust review", "evidence embeddings/RAG", "translation", "proof-note drafting"],
+      productSurfaces: ["/passport/[mint]", "/token/[mint]", "/profile/[wallet]", "/square", "/grant/status"],
+      privacyPolicy: "SignalCred sends only public proof evidence to the QVAC review service. Wallet secrets, seed phrases, RPC URLs, and API keys are blocked.",
+      source: "Tether QVAC review gateway",
+    },
     builderResources: {
       source: "Dev3pack Resources mapped into SignalCred product decisions",
       categories: dev3packResourceGroups,

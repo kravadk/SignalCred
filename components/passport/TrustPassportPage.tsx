@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink, ShieldAlert } from "lucide-react";
 import { PassportProofChecklist } from "@/components/passport/PassportProofChecklist";
 import { PassportVerdict } from "@/components/passport/PassportVerdict";
+import { PrivateQvacReview } from "@/components/qvac/PrivateQvacReview";
 import { normalizeImageUrl, proxiedImageUrl } from "@/lib/image-url";
 import type { TokenPassportResponse } from "@/lib/trust-passport";
 import { cn, shortWallet } from "@/lib/utils";
@@ -71,6 +72,7 @@ export function TrustPassportPage({ passport }: { passport: TokenPassportRespons
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0 space-y-4">
+          <PrivateQvacReview passport={passport} mode="passport" />
           <PassportProofChecklist rows={passport.evidence} />
         </div>
 

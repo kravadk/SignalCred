@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
+import { PrivateQvacReview } from "@/components/qvac/PrivateQvacReview";
 import type { TokenPassportResponse } from "@/lib/trust-passport";
 
 export function BeforeYouBuyPanel({ mint }: { mint: string }) {
@@ -81,6 +82,11 @@ export function BeforeYouBuyPanel({ mint }: { mint: string }) {
           {passport ? (riskCount ? `${riskCount} review` : "clear") : "loading"}
         </span>
       </div>
+      {passport && (
+        <div className="mt-2">
+          <PrivateQvacReview passport={passport} mode="before-buy" compact />
+        </div>
+      )}
     </section>
   );
 }

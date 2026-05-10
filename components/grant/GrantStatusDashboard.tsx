@@ -6,6 +6,7 @@ import {
   Activity,
   ArrowRight,
   BadgeCheck,
+  BrainCircuit,
   DatabaseZap,
   ExternalLink,
   FileCheck2,
@@ -15,6 +16,7 @@ import {
   ShieldCheck,
   WalletCards,
 } from "lucide-react";
+import { getQvacHealth, type QvacHealth } from "@/lib/qvac-client";
 
 type GrantStatus = {
   generatedAt: string;
@@ -70,6 +72,18 @@ type GrantStatus = {
     embedHref: string;
     cacheSeconds: number;
     readOnly: boolean;
+  };
+  qvac: {
+    enabled: boolean;
+    serviceStatus: string;
+    publicGateway: string;
+    privateReview: boolean;
+    cloudFallback: boolean;
+    runtime: string;
+    capabilities: string[];
+    productSurfaces: string[];
+    privacyPolicy: string;
+    source: string;
   };
   builderResources: {
     source: string;
@@ -166,6 +180,8 @@ function SourceLine({ source, freshness }: { source: string; freshness: string }
 
 export function GrantStatusDashboard() {
   const [data, setData] = useState<GrantStatus | null>(null);
+  const [qvacHealth, setQvacHealth] = useState<QvacHealth | null>(null);
+  const [lastQvacAnalysis, setLastQvacAnalysis] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -173,6 +189,18 @@ export function GrantStatusDashboard() {
       .then((res) => res.json())
       .then((body) => setData(body))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getQvacHealth(controller.signal).then(setQvacHealth);
+    try {
+      const raw = window.localStorage.getItem("signalcred.qvac.lastAnalysis");
+      setLastQvacAnalysis(raw ? JSON.parse(raw) : null);
+    } catch {
+      setLastQvacAnalysis(null);
+    }
+    return () => controller.abort();
   }, []);
 
   const readiness = useMemo(() => {
@@ -323,6 +351,59 @@ export function GrantStatusDashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+          </section>
+
+          <section className="card p-5">
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-[#62d9ff]/20 bg-[#62d9ff]/10 px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-[#8fd8ff]">
+                  <BrainCircuit size={13} />
+                  Tether QVAC track
+                </div>
+                <h2 className="font-display text-2xl text-white">QVAC Trust Review</h2>
+                <p className="mt-1 max-w-3xl text-xs font-body leading-5 text-white/45">
+                  SignalCred uses QVAC to explain passport evidence, risk labels, fee loops, creator graphs, and social proof through a private review gateway. QVAC explains evidence; it never creates proof or signs transactions.
+                </p>
+              </div>
+              <span className={`rounded-lg border px-3 py-2 font-mono text-[10px] font-bold uppercase ${qvacHealth?.ready ? "border-[#00ff88]/18 bg-[#00ff88]/10 text-[#69d99a]" : "border-[#ffb84d]/18 bg-[#ffb84d]/10 text-[#ffcc7a]"}`}>
+                {qvacHealth?.ready ? `${qvacHealth.mode} ready` : "QVAC unavailable"}
+              </span>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <MetricTile label="QVAC config" value={data.qvac.enabled ? "enabled" : "optional"} sub={data.qvac.publicGateway} tone="blue" />
+              <MetricTile label="Review service" value={qvacHealth?.ready ? "ready" : data.qvac.serviceStatus} sub={qvacHealth?.device ?? data.qvac.runtime} tone={qvacHealth?.ready ? "green" : "amber"} />
+              <MetricTile label="Cloud fallback" value={data.qvac.cloudFallback ? "enabled" : "disabled"} sub={data.qvac.privateReview ? "private evidence review" : "review config"} tone="green" />
+              <MetricTile label="Capabilities" value={data.qvac.capabilities.length} sub={data.qvac.capabilities.slice(0, 2).join(" / ")} tone="blue" />
+            </div>
+            <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1fr]">
+              <div className="rounded-xl border border-white/8 bg-black/18 p-3">
+                <p className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-white/30">Product surfaces</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {data.qvac.productSurfaces.map((surface) => (
+                    <span key={surface} className="rounded-md border border-[#62d9ff]/12 bg-[#62d9ff]/8 px-2 py-1 font-mono text-[10px] text-[#8fd8ff]">
+                      {surface}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-xl border border-[#00ff88]/10 bg-[#00ff88]/[0.035] p-3">
+                <p className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-[#69d99a]">Privacy policy</p>
+                <p className="mt-2 text-xs font-body leading-5 text-white/46">{data.qvac.privacyPolicy}</p>
+              </div>
+            </div>
+            <div className="mt-3 rounded-xl border border-white/8 bg-black/18 p-3">
+              <p className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-white/30">Last QVAC analysis</p>
+              {lastQvacAnalysis ? (
+                <div className="mt-2 grid gap-2 md:grid-cols-[180px_1fr]">
+                  <p className="font-mono text-xs text-[#8fd8ff]">{String(lastQvacAnalysis.at ?? "unknown")}</p>
+                  <p className="text-xs font-body leading-5 text-white/50">{String(lastQvacAnalysis.summary ?? "QVAC review completed.")}</p>
+                </div>
+              ) : (
+                <p className="mt-2 text-xs font-body leading-5 text-white/38">
+                  No QVAC review generated in this browser yet. Open a passport and run QVAC Trust Review to populate this field.
+                </p>
+              )}
             </div>
           </section>
 

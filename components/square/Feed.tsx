@@ -42,6 +42,8 @@ import { MilestonesCard } from "@/components/token/MilestonesCard";
 import { ProofRankedPostCard } from "@/components/square/ProofRankedPostCard";
 import { SocialValidationPanel } from "@/components/square/SocialValidationPanel";
 import { normalizeImageUrl as normalizeSharedImageUrl, proxiedImageUrl } from "@/lib/image-url";
+import { requestQvacReview } from "@/lib/qvac-client";
+import type { TokenPassportResponse } from "@/lib/trust-passport";
 
 type Tab = "for-you" | "following" | "official" | "signals";
 type PostType = "update" | "analysis";
@@ -281,6 +283,7 @@ function PostComposer({
   const [resolvingToken, setResolvingToken] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [qvacDrafting, setQvacDrafting] = useState(false);
 
   const remaining = MAX_POST_LENGTH - content.length;
   const overLimit = remaining < 0;
@@ -449,6 +452,48 @@ function PostComposer({
     }
   };
 
+  const draftWithQvac = async () => {
+    setExpanded(true);
+    setPostError("");
+    const attachedMint = await resolveAttachedMint();
+    if (!attachedMint) {
+      setPostError("Attach an indexed Bags token before asking QVAC to draft a proof note.");
+      return;
+    }
+    setQvacDrafting(true);
+    try {
+      const res = await fetch(`/api/tokens/${attachedMint}/passport`, { cache: "no-store" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.userMessage || body.error || "Passport unavailable for this token.");
+      const passport = (body.passport ?? body) as TokenPassportResponse;
+      const review = await requestQvacReview({
+        endpoint: "analyze/passport",
+        passport,
+        question: "Draft a concise token-linked proof note for Square. Mention evidence, not price prediction.",
+      });
+      const sources = review.sourceEvidenceIds.slice(0, 4).join(", ");
+      const draft = `QVAC proof note: ${review.summary}${sources ? ` Sources: ${sources}.` : ""}`;
+      setContent(draft.slice(0, MAX_POST_LENGTH));
+      setTokenMint(attachedMint);
+      console.info("[square-action]", {
+        action: "qvac.draft",
+        status: "success",
+        tokenMint: `${attachedMint.slice(0, 8)}...${attachedMint.slice(-5)}`,
+        privacyMode: review.privacyMode,
+      });
+    } catch (error) {
+      console.error("[square-action]", {
+        action: "qvac.draft",
+        status: "error",
+        errorType: "qvac_review",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      setPostError(error instanceof Error ? error.message : "QVAC proof draft is unavailable right now.");
+    } finally {
+      setQvacDrafting(false);
+    }
+  };
+
   return (
     <section className="border-b border-white/[0.055] bg-[#0d1020] px-4 py-3">
       <div className="flex gap-3">
@@ -591,6 +636,15 @@ function PostComposer({
                 if (file) handleImageFile(file);
               }}
             />
+            <button
+              onClick={draftWithQvac}
+              disabled={qvacDrafting || resolvingToken}
+              className="flex h-8 items-center gap-1.5 rounded-full border border-[#62d9ff]/14 bg-[#62d9ff]/8 px-3 text-xs font-bold text-[#8fd8ff] hover:border-[#62d9ff]/28 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+              title="Draft token-linked proof note with QVAC"
+            >
+              {qvacDrafting ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+              QVAC draft
+            </button>
             <span className={cn("ml-auto text-xs font-semibold tabular-nums", overLimit ? "text-rose-300" : remaining < 40 ? "text-amber-300" : "text-white/35")}>
               {remaining}
             </span>

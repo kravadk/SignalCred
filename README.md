@@ -24,7 +24,7 @@ SignalCred answers those questions with source-labeled evidence, explorer links,
 1. **Bags API** - Bags launch/feed indexing, pool proof, creator/admin proof, lifetime fees, claim events, launch/trade/fee SDK flows, and Trust Passport evidence.
 2. **Fee Sharing / Creator Reputation** - real Bags fees become token and creator reputation through lifetime fees, fee velocity, claim timeline, receipts, risk flags, and Creator Trust Graph.
 3. **Social Finance** - Square is token-linked social validation: official updates, proof-ranked posts, milestones, campaigns, and social score without generic feed noise.
-4. **Tether / USDT** - creator economics are shown in USDT terms through treasury planning, campaign budgets, and attached SPL USDT funding proof. SignalCred does not execute automatic payouts.
+4. **Tether / USDT + QVAC** - creator economics are shown in USDT terms through treasury planning, campaign budgets, and attached SPL USDT funding proof. SignalCred also uses QVAC for private trust passport review. SignalCred does not execute automatic payouts.
 
 Not primary tracks: generic AI agents, generic payments, privacy, yield vaults, multisig, referrals, calendars, airdrops, GameFi, DePIN, or custom EVM contracts.
 
@@ -93,6 +93,7 @@ Public Bags Trust Passport:
 - risk labels;
 - score breakdown;
 - public embed snippet.
+- QVAC Trust Review for private passport explanation.
 
 ### `/profile/[wallet]`
 
@@ -125,6 +126,7 @@ Token Social Proof layer:
 - campaign and milestone context;
 - proof-ranked social activity;
 - anti-spam and duplicate/rate-limit protection.
+- optional QVAC proof-note drafting that creates a draft only, never an automatic post.
 
 ### `/grant/status`
 
@@ -137,7 +139,49 @@ Grant reviewer dashboard:
 - social proof coverage;
 - USDT campaign coverage;
 - public API/embed status;
+- QVAC review readiness;
 - no-fake-data, signature auth, server-only key, and rate-limit policies.
+
+## Tether QVAC Integration
+
+SignalCred integrates QVAC as a **private trust review layer** behind the SignalCred API gateway. The browser fetches real SignalCred proof data, normalizes it, and sends only public evidence JSON through `/api/qvac`. QVAC then explains what the user should inspect before trading.
+
+Configure the QVAC service endpoint:
+
+```bash
+QVAC_SERVICE_URL=https://your-qvac-service.example
+QVAC_ENABLED=true
+```
+
+Optional smoke-test mode:
+
+```bash
+$env:QVAC_MOCK="1"; npm run qvac:companion
+npm run test:qvac
+```
+
+QVAC product surfaces:
+
+- `/passport/[mint]` - QVAC Trust Review summarizes passport evidence and risk labels.
+- `/token/[mint]` - Before You Buy can be explained with QVAC.
+- `/profile/[wallet]` - Creator Risk Review explains creator graph evidence.
+- `/square` - QVAC drafts token-linked proof notes, but does not auto-post.
+- `/grant/status` - shows QVAC review readiness and privacy policy.
+
+QVAC capabilities used:
+
+- QVAC LLM inference for trust passport summaries;
+- evidence embeddings/RAG for “ask about proof” search;
+- translation of trust summaries;
+- proof-note drafting grounded in evidence row IDs.
+
+Privacy and safety:
+
+- no wallet custody;
+- no seed phrase requests;
+- no automatic wallet signing, custody, or payout execution;
+- wallet secrets, private keys, RPC URLs, and API keys are blocked before QVAC review;
+- QVAC explains evidence, it does not replace SignalCred’s trust score or create fake proof.
 
 ## Public Trust API
 
@@ -215,6 +259,7 @@ Required env lives in `.env.example`. Production deployments also need:
 ```bash
 npm run typecheck
 npm run test:demo
+npm run test:qvac
 npm run build
 npm run check:docs
 npm run check:submit
@@ -228,10 +273,11 @@ npm run check:submit
 2. Open `/token` and select a token with market/proof data.
 3. Open `/token/[mint]` and show buy/sell, Evidence, Fee Loop Evidence, Social Proof, and Trust Passport link.
 4. Open `/passport/[mint]` and show source/pool/creator/market/fee/social/USDT proof with explorer links.
-5. Open `/profile/[wallet]` and show Creator Trust Graph + USDT Creator Treasury.
-6. Open `/fees` and show creator/token reputation.
-7. Open `/square?token=[mint]` and show token-linked social proof.
-8. Open `/launch` and explain Bags-native token creation.
+5. Open QVAC Trust Review and ask “What should I inspect before trading?” to show evidence-grounded AI.
+6. Open `/profile/[wallet]` and show Creator Trust Graph + USDT Creator Treasury + creator review.
+7. Open `/fees` and show creator/token reputation.
+8. Open `/square?token=[mint]` and show token-linked social proof plus QVAC proof-note draft.
+9. Open `/launch` and explain Bags-native token creation.
 
 ## Known Production Steps
 
