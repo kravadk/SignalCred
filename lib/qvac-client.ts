@@ -2,7 +2,7 @@
 
 import type { TokenPassportResponse } from "@/lib/trust-passport";
 
-export type QvacPrivacyMode = "qvac_private" | "qvac_demo" | "unavailable" | "local_qvac" | "local_mock" | "offline";
+export type QvacPrivacyMode = "qvac_private" | "qvac_demo" | "unavailable";
 
 export type QvacTrustReview = {
   summary: string;
@@ -24,6 +24,13 @@ export type QvacHealth = {
   modelId: string | null;
   embeddingModelId: string | null;
   translationModelId: string | null;
+  models?: {
+    llm?: { status: "loading" | "loaded" | "disabled" | "error"; modelId: string | null; source?: string; error?: string };
+    embeddings?: { status: "loading" | "loaded" | "disabled" | "error"; modelId: string | null; source?: string; error?: string };
+    translation?: { status: "loading" | "loaded" | "disabled" | "error"; modelId: string | null; source?: string; error?: string };
+  };
+  mockEnabled?: boolean;
+  mockAllowed?: boolean;
   device: string;
   capabilities: string[];
   message: string;

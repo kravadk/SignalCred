@@ -151,13 +151,36 @@ Configure the QVAC service endpoint:
 ```bash
 QVAC_SERVICE_URL=https://your-qvac-service.example
 QVAC_ENABLED=true
+QVAC_MOCK=false
 ```
+
+QVAC service runtime variables:
+
+```bash
+QVAC_HOST=0.0.0.0
+QVAC_PORT=10000
+QVAC_LLM_MODEL_SRC=
+QVAC_LLM_MODEL_TYPE=llm
+QVAC_LLM_CTX_SIZE=4096
+QVAC_EMBED_MODEL_SRC=
+QVAC_EMBED_MODEL_TYPE=embeddings
+QVAC_TRANSLATION_MODEL_SRC=
+QVAC_TRANSLATION_MODEL_TYPE=nmt
+```
+
+If `QVAC_LLM_MODEL_SRC` is empty, the companion loads the bundled QVAC `LLAMA_3_2_1B_INST_Q4_0` descriptor. `QVAC_MOCK=1` is only for smoke tests and should not be used for the final Tether demo.
 
 Optional smoke-test mode:
 
 ```bash
 $env:QVAC_MOCK="1"; npm run qvac:companion
 npm run test:qvac
+```
+
+Real-mode validation:
+
+```bash
+$env:QVAC_REQUIRE_REAL="true"; npm run test:qvac
 ```
 
 QVAC product surfaces:
@@ -171,8 +194,8 @@ QVAC product surfaces:
 QVAC capabilities used:
 
 - QVAC LLM inference for trust passport summaries;
-- evidence embeddings/RAG for “ask about proof” search;
-- translation of trust summaries;
+- evidence embeddings/RAG for “ask about proof” search when an embedding model is configured;
+- translation of trust summaries through a QVAC translation model, or through the loaded LLM if no NMT model is configured;
 - proof-note drafting grounded in evidence row IDs.
 
 Privacy and safety:
@@ -182,6 +205,7 @@ Privacy and safety:
 - no automatic wallet signing, custody, or payout execution;
 - wallet secrets, private keys, RPC URLs, and API keys are blocked before QVAC review;
 - QVAC explains evidence, it does not replace SignalCred’s trust score or create fake proof.
+- production fails closed: if the real QVAC model is unavailable, SignalCred shows `QVAC unavailable` instead of a fake review.
 
 ## Public Trust API
 

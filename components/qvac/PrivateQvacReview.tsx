@@ -35,8 +35,8 @@ export function PrivateQvacReview({
 
   const status = useMemo(() => {
     if (!health) return { label: "QVAC unavailable", tone: "amber" as const };
-    if (health.mode === "qvac_private" || health.mode === "local_qvac") return { label: "QVAC ready", tone: "green" as const };
-    if (health.mode === "qvac_demo" || health.mode === "local_mock") return { label: "QVAC demo", tone: "blue" as const };
+    if (health.mode === "qvac_private") return { label: "QVAC ready", tone: "green" as const };
+    if (health.mode === "qvac_demo") return { label: "QVAC test mode", tone: "blue" as const };
     return { label: "QVAC unavailable", tone: "amber" as const };
   }, [health]);
 
@@ -142,7 +142,7 @@ export function PrivateQvacReview({
 
       {!health?.ready && (
         <p className="mt-2 rounded-lg border border-[#ffb84d]/16 bg-[#ffb84d]/8 px-3 py-2 text-xs font-body leading-5 text-[#ffcc7a]">
-          QVAC review is not connected for this environment. The rest of SignalCred still uses verified source, fee, social, and explorer data.
+          QVAC review is unavailable in this environment. SignalCred still shows verified source, fee, social, and explorer evidence without generating an AI answer.
         </p>
       )}
 

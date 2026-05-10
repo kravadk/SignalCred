@@ -1,5 +1,9 @@
-const BASE_URL = process.env.NEXT_PUBLIC_QVAC_COMPANION_URL || "http://127.0.0.1:8787";
+const BASE_URL = process.env.QVAC_VALIDATE_URL
+  || process.env.QVAC_SERVICE_URL
+  || process.env.NEXT_PUBLIC_QVAC_COMPANION_URL
+  || "http://127.0.0.1:8787";
 const REQUIRED = process.env.QVAC_VALIDATE_REQUIRED === "true";
+const REQUIRE_REAL = process.env.QVAC_REQUIRE_REAL === "true";
 
 function fail(message: string): never {
   console.error(`[qvac-validate] ${message}`);
@@ -30,6 +34,12 @@ async function main() {
   if (!health.ok) fail(`health returned ${health.status}`);
   const healthBody = await health.json();
   if (!healthBody.ready) fail("health.ready is false");
+  if (REQUIRE_REAL && healthBody.mode !== "qvac_private") {
+    fail(`expected qvac_private mode, got ${healthBody.mode}`);
+  }
+  if (REQUIRE_REAL && healthBody.mockEnabled) {
+    fail("QVAC mock mode is enabled");
+  }
 
   const passport = {
     mint: "8zAeGH7GbT7Pvig3n1tWTgmTi5XqYzeWHVUwfKfiBAGS",
