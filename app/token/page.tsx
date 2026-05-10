@@ -231,7 +231,8 @@ export default function TokenListPage() {
     else setLoadingMore(true);
     try {
       const res = await fetch(`/api/trending/tokens?limit=${PAGE_SIZE}&offset=${offset}`, { cache: "no-store" });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({ tokens: [], error: "invalid_json" }));
+      if (!res.ok && !Array.isArray(data.tokens)) throw new Error(data.warning || data.error || "Token index unavailable");
       const nextTokens: TokenRow[] = data.tokens ?? [];
       setTokens((current) => {
         if (offset === 0) return nextTokens;

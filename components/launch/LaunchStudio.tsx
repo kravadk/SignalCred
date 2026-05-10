@@ -157,7 +157,7 @@ export function LaunchStudio() {
 
   useEffect(() => {
     fetch("/api/trending/tokens")
-      .then((r) => r.json())
+      .then((r) => r.ok ? r.json().catch(() => ({ tokens: [] })) : { tokens: [] })
       .then((d) => setLaunchedCount(d.tokens?.length ?? 0))
       .catch(() => {});
   }, []);

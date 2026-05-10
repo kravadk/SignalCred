@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { posts, tokens } from "@/db/schema";
 import { desc, eq, count, sum } from "drizzle-orm";
 import { getMultiTokenOverviews } from "@/lib/birdeye";
@@ -113,6 +113,7 @@ function hasCachedBagsProof(metadata: unknown) {
 }
 
 async function getCachedBagsRows(limit: number) {
+  if (!isDatabaseConfigured()) return [];
   const rows = await db
     .select()
     .from(tokens)
@@ -253,9 +254,10 @@ async function getLiveBagsUniverseRows(offset: number, limit: number): Promise<B
 export async function GET(req: NextRequest) {
   noStore();
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
-  const rl = rateLimit(`trending:${ip}`, 30, 60_000);
-  if (!rl.allowed) return NextResponse.json({ error: "Rate limit" }, { status: 429 });
+  try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+    const rl = rateLimit(`trending:${ip}`, 30, 60_000);
+    if (!rl.allowed) return NextResponse.json({ error: "Rate limit" }, { status: 429 });
 
   const limit = clampNumber(req.nextUrl.searchParams.get("limit"), DEFAULT_LIMIT, 20, MAX_LIMIT);
   const offset = clampNumber(req.nextUrl.searchParams.get("offset"), 0, 0, 10_000);
@@ -280,7 +282,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const cachedRows = await getCachedBagsRows(limit);
+    const cachedRows = await getCachedBagsRows(limit).catch(() => []);
     universe = {
       rows: cachedRows,
       total: cachedRows.length,
@@ -300,8 +302,8 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const socialScores = await Promise.allSettled(
-    rows.map(async (t) => {
+  const socialScores = isDatabaseConfigured()
+    ? await Promise.allSettled(rows.map(async (t) => {
       const [postStats] = await db
         .select({
           postCount: count(posts.id),
@@ -317,8 +319,8 @@ export async function GET(req: NextRequest) {
       // Social Score formula from TZ
       const score = pCount * 3 + likes * 1 + comments * 2;
       return { mint: t.mint, score };
-    })
-  );
+    }))
+    : [];
 
   const scoreMap = new Map<string, number>();
   socialScores.forEach((r) => {
@@ -477,4 +479,34 @@ export async function GET(req: NextRequest) {
     lastGoodCached = cached;
   }
   return NextResponse.json(payload);
+  } catch (error) {
+    console.warn("[api/trending/tokens] unavailable", error instanceof Error ? error.message : error);
+    if (lastGoodCached) {
+      return NextResponse.json({
+        ...(lastGoodCached.data as Record<string, unknown>),
+        degraded: true,
+        stale: true,
+        warning: "Token index is temporarily degraded; serving last successful snapshot.",
+      });
+    }
+    return NextResponse.json({
+      tokens: [],
+      source: "unavailable",
+      count: 0,
+      total: 0,
+      limit: DEFAULT_LIMIT,
+      offset: 0,
+      hasMore: false,
+      coverage: {
+        feedCount: 0,
+        migratedPoolCount: 0,
+        marketCount: 0,
+        volume24h: 0,
+        txns24h: 0,
+        feeVelocityActiveCount: 0,
+      },
+      degraded: true,
+      warning: "Token index is temporarily unavailable.",
+    });
+  }
 }

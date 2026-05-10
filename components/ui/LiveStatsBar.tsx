@@ -26,8 +26,8 @@ export function LiveStatsBar() {
   useEffect(() => {
     const load = () =>
       fetch("/api/stats")
-        .then((r) => r.json())
-        .then(setStats)
+        .then((r) => r.ok ? r.json().catch(() => null) : null)
+        .then((data) => data && setStats(data))
         .catch(() => {});
     load();
     const interval = setInterval(load, 30_000);

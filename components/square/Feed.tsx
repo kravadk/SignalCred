@@ -1556,7 +1556,7 @@ function FeedSidebar() {
 
   useEffect(() => {
     fetch("/api/trending/tokens")
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json().catch(() => ({ tokens: [] })) : { tokens: [] })
       .then((data) => setTrending(data.tokens?.slice(0, 5) ?? []))
       .catch(() => {});
   }, []);

@@ -35,7 +35,7 @@ export function NotificationBell() {
   const fetchNotifs = () => {
     if (!publicKey) return;
     fetch("/api/notifications", { headers: { "x-wallet": publicKey.toBase58() } })
-      .then(r => r.json())
+      .then(async (r) => r.ok ? r.json().catch(() => ({ notifications: [] })) : { notifications: [] })
       .then(d => setNotifs(d.notifications ?? []));
   };
 
