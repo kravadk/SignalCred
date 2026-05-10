@@ -296,10 +296,25 @@ export async function GET(req: NextRequest) {
   const indexSource = universe.source;
 
   if (!rows.length) {
-    return NextResponse.json(
-      { tokens: [], source: "bags_feed", degraded: true, error: "No live Bags tokens returned by the Bags feed or verified cache" },
-      { status: 503 }
-    );
+    return NextResponse.json({
+      tokens: [],
+      source: "unavailable",
+      count: 0,
+      total: 0,
+      limit,
+      offset,
+      hasMore: false,
+      coverage: {
+        feedCount: universe.feedCount,
+        migratedPoolCount: universe.poolCount,
+        marketCount: 0,
+        volume24h: 0,
+        txns24h: 0,
+        feeVelocityActiveCount: 0,
+      },
+      degraded: true,
+      warning: "No live Bags tokens returned by the Bags feed or verified cache.",
+    });
   }
 
   const socialScores = isDatabaseConfigured()

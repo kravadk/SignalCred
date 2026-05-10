@@ -1,7 +1,7 @@
 import { count, desc, eq, sql } from "drizzle-orm";
 import { posts, rewardCampaigns, tokens } from "@/db/schema";
 import { getBagsCreators, getBagsLaunchFeed, getBagsLifetimeFees, getBagsPools } from "@/lib/bags-index";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { getFeeVelocity24h } from "@/lib/fee-velocity";
 import { getRestreamReadiness } from "@/lib/restream";
 
@@ -123,10 +123,11 @@ function scoreStatus(status: TrustSignalStatus) {
 
 export async function getTrustSignalsLive(limit = 24) {
   const capped = Math.min(Math.max(limit, 1), 60);
+  const dbReady = isDatabaseConfigured();
   const [feed, pools, indexedRows] = await Promise.all([
     withTimeout(getBagsLaunchFeed(), 4_000, []),
     withTimeout(getBagsPools(true), 4_000, []),
-    db.select().from(tokens).orderBy(desc(tokens.launchedAt)).limit(32),
+    dbReady ? db.select().from(tokens).orderBy(desc(tokens.launchedAt)).limit(32).catch(() => []) : Promise.resolve([]),
   ]);
 
   const poolMints = new Set(pools.map((pool) => pool.tokenMint).filter(Boolean));
@@ -173,9 +174,9 @@ export async function getTrustSignalsLive(limit = 24) {
   const candidates = Array.from(byMint.values()).slice(0, 14);
   const signalsNested = await Promise.all(candidates.map(async (candidate) => {
     const [socialRow, officialRow, tokenCampaigns, lifetimeFeesRaw, creators] = await Promise.all([
-      db.select({ value: count(posts.id) }).from(posts).where(eq(posts.tokenMint, candidate.mint)).then((rows) => safeNumber(rows[0]?.value)),
-      db.select({ value: count(posts.id) }).from(posts).where(sql`${posts.tokenMint} = ${candidate.mint} and ${posts.postType} = 'official'`).then((rows) => safeNumber(rows[0]?.value)),
-      withTimeout(db.select().from(rewardCampaigns).where(eq(rewardCampaigns.tokenMint, candidate.mint)).limit(12), 2_500, []),
+      dbReady ? db.select({ value: count(posts.id) }).from(posts).where(eq(posts.tokenMint, candidate.mint)).then((rows) => safeNumber(rows[0]?.value)).catch(() => 0) : Promise.resolve(0),
+      dbReady ? db.select({ value: count(posts.id) }).from(posts).where(sql`${posts.tokenMint} = ${candidate.mint} and ${posts.postType} = 'official'`).then((rows) => safeNumber(rows[0]?.value)).catch(() => 0) : Promise.resolve(0),
+      dbReady ? withTimeout(db.select().from(rewardCampaigns).where(eq(rewardCampaigns.tokenMint, candidate.mint)).limit(12), 2_500, []) : Promise.resolve([]),
       withTimeout(getBagsLifetimeFees(candidate.mint), 2_500, null),
       withTimeout(getBagsCreators(candidate.mint), 2_500, []),
     ]);

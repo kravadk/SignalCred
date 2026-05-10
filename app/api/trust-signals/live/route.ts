@@ -13,7 +13,22 @@ export async function GET(req: NextRequest) {
   const stream = req.nextUrl.searchParams.get("stream") === "1";
 
   if (!stream) {
-    const snapshot = await getTrustSignalsLive(limit);
+    const snapshot = await getTrustSignalsLive(limit).catch((error) => {
+      console.warn("[api/trust-signals/live] unavailable", error instanceof Error ? error.message : error);
+      return {
+        title: "Trust Signals Live",
+        positioning: "Verified Bags proof changes across launches, pools, fees, campaigns, and creator proof.",
+        mode: "degraded",
+        signals: [],
+        coverage: { tokensSampled: 0, signals: 0, verified: 0, warming: 0, risk: 0, campaigns: 0 },
+        restream: { status: "unavailable", note: "Trust signals are temporarily unavailable." },
+        sourceLabels: {},
+        noFakeData: true,
+        generatedAt: new Date().toISOString(),
+        degraded: true,
+        warning: "Trust signals are temporarily unavailable.",
+      };
+    });
     return Response.json(snapshot, {
       headers: { "Cache-Control": "no-store" },
     });
