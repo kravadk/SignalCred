@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { tokens, users } from "@/db/schema";
 import { and, desc, eq, ilike, or } from "drizzle-orm";
 import { logAction } from "@/lib/action-log";
@@ -10,6 +10,18 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get("search")?.trim() ?? "";
   const limitRaw = parseInt(searchParams.get("limit") ?? "20", 10);
   const limit = Math.min(Math.max(isNaN(limitRaw) ? 20 : limitRaw, 1), 100);
+
+  const empty = (warning: string) => NextResponse.json({
+    tokens: [],
+    filter: { creator: creator ?? null, search: search || null },
+    count: 0,
+    degraded: true,
+    warning,
+  });
+
+  if (!isDatabaseConfigured()) {
+    return empty("Token cache database is not configured. Use the Bags Trust Index feed while the token cache is unavailable.");
+  }
 
   const searchFilter = search
     ? or(
@@ -26,9 +38,13 @@ export async function GET(req: NextRequest) {
       : eq(tokens.creatorWallet, creator)
     : searchFilter;
 
-  const rows = whereFilter
-    ? await db.select().from(tokens).where(whereFilter).orderBy(desc(tokens.createdAt)).limit(limit)
-    : await db.select().from(tokens).orderBy(desc(tokens.createdAt)).limit(limit);
+  const rows = await (whereFilter
+    ? db.select().from(tokens).where(whereFilter).orderBy(desc(tokens.createdAt)).limit(limit)
+    : db.select().from(tokens).orderBy(desc(tokens.createdAt)).limit(limit)
+  ).catch((error) => {
+    console.warn("[api/tokens] unavailable", error instanceof Error ? error.message : error);
+    return [];
+  });
 
   return NextResponse.json({ tokens: rows, filter: { creator: creator ?? null, search: search || null }, count: rows.length });
 }

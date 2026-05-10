@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { posts, tokens, users, follows } from "@/db/schema";
 import { and, desc, eq, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
 import { verifyWalletRequest } from "@/lib/wallet-auth";
@@ -53,7 +53,21 @@ export async function GET(req: NextRequest) {
     : tab === "following" ? "followed_token_posts"
     : "token_linked_recent";
 
+  const empty = (warning?: string) => NextResponse.json({
+    posts: [],
+    empty: true,
+    tokenLinkedOnly: true,
+    rankingSource,
+    filter: { tokenMint: tokenMint ?? null, search: search || null },
+    ...(warning ? { degraded: true, warning } : {}),
+  });
+
+  if (!isDatabaseConfigured()) {
+    return empty("Social proof database is not configured. Token-linked posts are temporarily unavailable.");
+  }
+
   const conditions = [tokenFilter];
+  try {
   if (search) {
     const like = `%${search}%`;
     const matchingTokens = await db
@@ -111,25 +125,13 @@ export async function GET(req: NextRequest) {
   } else if (tab === "following") {
     const wallet = req.headers.get("x-wallet");
     if (!wallet) {
-      return NextResponse.json({
-        posts: [],
-        empty: true,
-        tokenLinkedOnly: true,
-        rankingSource,
-        filter: { tokenMint: tokenMint ?? null, search: search || null },
-      });
+      return empty();
     }
     const followedList = await db.select({ following: follows.following })
       .from(follows).where(eq(follows.follower, wallet));
     const wallets = followedList.map(f => f.following).filter((w): w is string => w !== null);
     if (wallets.length === 0) {
-      return NextResponse.json({
-        posts: [],
-        empty: true,
-        tokenLinkedOnly: true,
-        rankingSource,
-        filter: { tokenMint: tokenMint ?? null, search: search || null },
-      });
+      return empty();
     }
     rows = await db.select().from(posts)
       .where(and(inArray(posts.authorWallet, wallets), whereFilter))
@@ -180,6 +182,10 @@ export async function GET(req: NextRequest) {
     rankingSource,
     filter: { tokenMint: tokenMint ?? null, search: search || null },
   });
+  } catch (error) {
+    console.warn("[api/posts] unavailable", error instanceof Error ? error.message : error);
+    return empty("Social proof feed is temporarily unavailable.");
+  }
 }
 
 export async function POST(req: NextRequest) {
