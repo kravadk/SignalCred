@@ -52,13 +52,16 @@ export async function bagsRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const apiKey = process.env.BAGS_API_KEY;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string> | undefined),
+  };
+  if (apiKey) headers["x-api-key"] = apiKey;
+
   const res = await fetch(`${BAGS_API_BASE}${path}`, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": requireBagsKey(),
-      ...options.headers,
-    },
+    headers,
   });
 
   let data: { success?: boolean; error?: string; response?: unknown };
