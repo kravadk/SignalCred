@@ -317,7 +317,6 @@ export function LaunchStudio() {
     uploadedMint, uploadedMetadata,
   ]);
 
-  // ── SUCCESS STATE ──────────────────────────────────────
   if (mintAddress) {
     const displayPost = launchPost || aiDraft?.launchPost || `🚀 $${symbol} is LIVE on Bags! Trade it now at signalcred.xyz/token/${mintAddress.slice(0, 8)}…`;
     return (

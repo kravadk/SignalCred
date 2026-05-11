@@ -323,7 +323,7 @@ export function LandingPage() {
                 <Link href="/token" className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl border-[3px] border-[#063b89] bg-[#ff9f22] px-5 font-display text-lg text-white shadow-[0_7px_0_#063b89] transition hover:-translate-y-1">
                   Open Trust Index
                 </Link>
-                <Link href="/passport/8zAeGH7GbT7Pvig3n1tWTgmTi5XqYzeWHVUwfKfiBAGS" className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl border-[3px] border-[#063b89] bg-white px-5 font-display text-lg text-[#063b89] shadow-[0_7px_0_#063b89] transition hover:-translate-y-1">
+                <Link href="/passport/94rNUftdQYXdiYzpkiM6Stdc9bZrxLNasEYeCM8oBAGS" className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl border-[3px] border-[#063b89] bg-white px-5 font-display text-lg text-[#063b89] shadow-[0_7px_0_#063b89] transition hover:-translate-y-1">
                   Sample Passport
                 </Link>
               </div>
@@ -440,7 +440,7 @@ export function LandingPage() {
                 Every trust signal has a source, a status, and a next proof step.
               </h2>
             </div>
-            <Link href="/passport/8zAeGH7GbT7Pvig3n1tWTgmTi5XqYzeWHVUwfKfiBAGS" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-5 text-sm font-black text-white shadow-[0_14px_34px_rgba(0,0,0,0.2)] hover:bg-white hover:text-[#101524]">
+            <Link href="/passport/94rNUftdQYXdiYzpkiM6Stdc9bZrxLNasEYeCM8oBAGS" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.07] px-5 text-sm font-black text-white shadow-[0_14px_34px_rgba(0,0,0,0.2)] hover:bg-white hover:text-[#101524]">
               View sample passport <ExternalLink size={16} />
             </Link>
           </div>

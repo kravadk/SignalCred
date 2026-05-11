@@ -17,6 +17,7 @@
     "db:migrate": "drizzle-kit migrate",
     "test": "node --experimental-strip-types scripts/smoke-test.ts",
     "test:demo": "node --experimental-strip-types scripts/demo-readonly-test.ts",
+    "test:flow": "node --experimental-strip-types scripts/demo-readonly-test.ts",
     "test:browser": "node scripts/browser-submit-qa.mjs",
     "test:api": "node --experimental-strip-types scripts/api-test.ts",
     "test:pages": "node --experimental-strip-types scripts/pages-test.ts",

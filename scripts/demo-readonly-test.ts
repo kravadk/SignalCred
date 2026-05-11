@@ -183,7 +183,7 @@ async function run() {
     if (!tokens.length) return false;
     const duplicateExactMcap = new Map<number, number>();
     for (const token of tokens) {
-      if (typeof token.marketCap === "number") {
+      if (typeof token.marketCap === "number" && token.marketCap > 0) {
         duplicateExactMcap.set(token.marketCap, (duplicateExactMcap.get(token.marketCap) || 0) + 1);
       }
     }

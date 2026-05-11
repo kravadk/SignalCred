@@ -14,7 +14,6 @@ let passed = 0;
 let failed = 0;
 const results: { label: string; ok: boolean; status: number; note?: string }[] = [];
 
-// ── helpers ────────────────────────────────────────────────────────────────
 
 async function req(
   method: string,
@@ -106,15 +105,12 @@ function isArray(key: string) {
     Array.isArray((body as Record<string, unknown>)[key]);
 }
 
-// ── run ────────────────────────────────────────────────────────────────────
 
 async function run(): Promise<void> {
   console.log(`\n🧪  SignalCred — Full API Test Suite`);
   console.log(`   Target: ${BASE}\n`);
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("▶ Health & Stats");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     "GET /api/health",
@@ -128,9 +124,7 @@ async function run(): Promise<void> {
     hasKeys("liveTokens", "totalPosts", "totalUsers")
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Auth & Session");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     "POST /api/auth/session (valid wallet)",
@@ -150,9 +144,7 @@ async function run(): Promise<void> {
     400
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ /api/me");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     "GET /api/me (no wallet → user: null)",
@@ -172,9 +164,7 @@ async function run(): Promise<void> {
     405
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Posts — /api/posts");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     "GET /api/posts (default tab=new) — returns posts[]",
@@ -237,9 +227,7 @@ async function run(): Promise<void> {
     400
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Post interactions — like / comment / tip");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await checkStatus(
     "POST /api/posts/:id/like (no wallet → 401)",
@@ -285,9 +273,7 @@ async function run(): Promise<void> {
     404
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Tokens — /api/tokens");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     "GET /api/tokens — returns tokens[]",
@@ -332,9 +318,7 @@ async function run(): Promise<void> {
     400
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Token-specific routes — /api/tokens/:mint");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     `GET /api/tokens/:mint — returns token or null`,
@@ -382,9 +366,7 @@ async function run(): Promise<void> {
     400
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Trending");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     "GET /api/trending/tokens — returns tokens[]",
@@ -398,9 +380,7 @@ async function run(): Promise<void> {
     isArray("posts")
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Leaderboard");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     "GET /api/leaderboard — returns tokens[]",
@@ -408,9 +388,7 @@ async function run(): Promise<void> {
     isArray("tokens")
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Profiles");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await check(
     `GET /api/profiles/:wallet — returns profile`,
@@ -424,9 +402,7 @@ async function run(): Promise<void> {
     401
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Trade");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await checkStatus(
     "GET /api/trade/quote (no params → 400)",
@@ -452,9 +428,7 @@ async function run(): Promise<void> {
     400
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ Fees");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await checkStatus(
     "GET /api/fees/partner (no wallet → 401)",
@@ -474,9 +448,7 @@ async function run(): Promise<void> {
     401
   );
 
-  // ──────────────────────────────────────────────────────────────────────────
   console.log("\n▶ AI endpoints");
-  // ──────────────────────────────────────────────────────────────────────────
 
   await checkStatus(
     "POST /api/ai/token-draft (empty body → 400)",
@@ -509,7 +481,6 @@ async function run(): Promise<void> {
     200 // checkStatus will see the ok=true from inner fn
   );
 
-  // ── Summary ─────────────────────────────────────────────────────────────────
   console.log(`\n${"─".repeat(52)}`);
   console.log(
     `Total: ${passed + failed}  |  ✅ ${passed} passed  |  ❌ ${failed} failed`

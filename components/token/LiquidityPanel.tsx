@@ -66,7 +66,6 @@ export function LiquidityPanel({ mint, symbol }: { mint: string; symbol: string 
     setTokenAmount((solVal / parseFloat(pool.priceUsd || "1") * 100).toFixed(0));
   }, [solAmount, pool]);
 
-  // --- Not graduated state ---
   if (loading) {
     return (
       <div className="card p-5 flex items-center justify-center h-32">
@@ -105,7 +104,6 @@ export function LiquidityPanel({ mint, symbol }: { mint: string; symbol: string 
     );
   }
 
-  // --- Graduated: full LP panel ---
   const meteoraPoolUrl = `https://app.meteora.ag/pools/${pool.pairAddress}`;
 
   const handleAddLiquidity = async () => {

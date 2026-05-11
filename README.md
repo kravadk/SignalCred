@@ -6,7 +6,9 @@ SignalCred is the **trust and reputation layer for Bags tokens**. It combines a 
 
 Live app: https://signalcred.vercel.app
 
-Demo video: [TODO — add Loom/YouTube link before submission]
+Demo video: https://youtu.be/byWzh8yxHcQ
+
+Pitch video: https://youtu.be/FWuMNwZxrB4
 
 ## Why It Exists
 

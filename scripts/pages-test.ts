@@ -41,7 +41,6 @@ async function run(): Promise<void> {
   console.log(`\n🌐  SignalCred — Page Render Tests`);
   console.log(`   Target: ${BASE}\n`);
 
-  // ── Public pages ──────────────────────────────────────────────────────────
   console.log("▶ Public pages");
 
   await checkPage("Home /", "/");
@@ -52,7 +51,6 @@ async function run(): Promise<void> {
   await checkPage("Futures roadmap /futures", "/futures");
   await checkPage("Docs /docs", "/docs");
 
-  // ── Dynamic pages (valid-looking params) ─────────────────────────────────
   console.log("\n▶ Dynamic pages");
 
   // Token page — use SOL mint; page should render even if token not in DB
@@ -71,7 +69,6 @@ async function run(): Promise<void> {
     [200, 404]
   );
 
-  // ── Index redirects ───────────────────────────────────────────────────────
   console.log("\n▶ Index redirects / catch-alls");
 
   await checkPage(
@@ -86,7 +83,6 @@ async function run(): Promise<void> {
     [200, 307, 308, 302, 404]
   );
 
-  // ── 404 for unknown pages ─────────────────────────────────────────────────
   console.log("\n▶ 404 behaviour");
 
   await checkPage(
@@ -95,7 +91,6 @@ async function run(): Promise<void> {
     [404]
   );
 
-  // ── Summary ───────────────────────────────────────────────────────────────
   console.log(`\n${"─".repeat(52)}`);
   console.log(
     `Total: ${passed + failed}  |  ✅ ${passed} passed  |  ❌ ${failed} failed`

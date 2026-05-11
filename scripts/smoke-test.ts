@@ -47,13 +47,10 @@ async function post(path: string, payload: unknown, headers: Record<string, stri
 async function run(): Promise<void> {
   console.log(`\n🧪 SignalCred Smoke Tests → ${BASE}\n`);
 
-  // ── Health ──────────────────────────────────────────────
   await check("GET /api/health", () => get("/api/health"));
 
-  // ── Stats ───────────────────────────────────────────────
   await check("GET /api/stats", () => get("/api/stats"));
 
-  // ── Auth ────────────────────────────────────────────────
   await check(
     "POST /api/auth/session (valid wallet)",
     () => post("/api/auth/session", { wallet: WALLET })
@@ -66,33 +63,27 @@ async function run(): Promise<void> {
     }
   );
 
-  // ── Me ──────────────────────────────────────────────────
   await check("GET /api/me (no wallet → user null)", async () => {
     const r = await get("/api/me");
     const ok = r.ok && (r.body as Record<string,unknown>).user === null;
     return { ok, status: r.status, body: r.body };
   });
 
-  // ── Posts ───────────────────────────────────────────────
   await check("GET /api/posts?tab=new", () => get("/api/posts?tab=new"));
   await check("GET /api/posts?tab=trending", () => get("/api/posts?tab=trending"));
   await check("GET /api/posts?tab=launches", () => get("/api/posts?tab=launches"));
 
-  // ── Tokens ──────────────────────────────────────────────
   await check("GET /api/tokens", () => get("/api/tokens"));
   await check("GET /api/trending/tokens", () => get("/api/trending/tokens"));
   await check("GET /api/trending/posts", () => get("/api/trending/posts"));
 
-  // ── Leaderboard ─────────────────────────────────────────
   await check("GET /api/leaderboard", () => get("/api/leaderboard"));
 
-  // ── Profiles ────────────────────────────────────────────
   await check(
     `GET /api/profiles/${WALLET}`,
     () => get(`/api/profiles/${WALLET}`)
   );
 
-  // ── Protected endpoints → 401 ───────────────────────────
   await check("POST /api/posts (no wallet → 401)", async () => {
     const r = await post("/api/posts", { content: "test", postType: "update" });
     return { ok: r.status === 401, status: r.status, body: r.body };
@@ -107,7 +98,6 @@ async function run(): Promise<void> {
     return { ok: r.status === 405 || r.status === 401, status: r.status, body: r.body };
   });
 
-  // ── Trade ───────────────────────────────────────────────
   await check(
     "GET /api/trade/quote (missing params → 400)",
     async () => {
@@ -116,7 +106,6 @@ async function run(): Promise<void> {
     }
   );
 
-  // ── AI endpoints ────────────────────────────────────────
   await check(
     "POST /api/ai/token-draft (missing params → 400)",
     async () => {
@@ -132,7 +121,6 @@ async function run(): Promise<void> {
     }
   );
 
-  // ── Summary ─────────────────────────────────────────────
   console.log(`\n${"─".repeat(40)}`);
   console.log(`Total: ${passed + failed} | ✅ ${passed} passed | ❌ ${failed} failed`);
 
