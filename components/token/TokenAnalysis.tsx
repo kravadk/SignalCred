@@ -292,8 +292,8 @@ export function TokenAnalysis({ mint }: { mint: string }) {
                 <div className="rounded-xl bg-[#26aa68]/10 p-2.5">
                   <p className="text-[#69d99a] text-[10px] font-fun font-black uppercase tracking-wider mb-1.5">Bullish</p>
                   <ul className="space-y-1">
-                    {tradeSignal.bullish.map((b, i) => (
-                      <li key={i} className="flex items-start gap-1 text-[11px] font-fun text-white/60">
+                    {tradeSignal.bullish.map((b) => (
+                      <li key={b} className="flex items-start gap-1 text-[11px] font-fun text-white/60">
                         <CheckCircle2 size={9} className="text-[#69d99a] shrink-0 mt-0.5" />{b}
                       </li>
                     ))}
@@ -304,8 +304,8 @@ export function TokenAnalysis({ mint }: { mint: string }) {
                 <div className="rounded-xl bg-[#ff624e]/10 p-2.5">
                   <p className="text-[#ff624e] text-[10px] font-fun font-black uppercase tracking-wider mb-1.5">Bearish</p>
                   <ul className="space-y-1">
-                    {tradeSignal.bearish.map((b, i) => (
-                      <li key={i} className="flex items-start gap-1 text-[11px] font-fun text-white/60">
+                    {tradeSignal.bearish.map((b) => (
+                      <li key={b} className="flex items-start gap-1 text-[11px] font-fun text-white/60">
                         <AlertTriangle size={9} className="text-[#ff624e] shrink-0 mt-0.5" />{b}
                       </li>
                     ))}
