@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
+  BrainCircuit,
   CircleDollarSign,
   DatabaseZap,
   LayoutGrid,
@@ -31,6 +32,12 @@ const tracks = [
     body: "Fees become a public reputation signal: lifetime fees, claimed 24h, and hourly snapshot-based fee velocity.",
     proof: ["claim events", "fee snapshots", "velocity pending/active", "creator ranking"],
   },
+  {
+    icon: BrainCircuit,
+    title: "Tether / QVAC",
+    body: "Creator economics in USDT terms + private on-device AI trust review. QVAC explains token proof via @qvac/sdk locally — no data sent to cloud.",
+    proof: ["USDT creator treasury", "USDT trade panel", "QVAC LLM inference", "local-first evidence"],
+  },
 ];
 
 const demoFlow = [
@@ -58,6 +65,16 @@ const demoFlow = [
     title: "Post or launch",
     href: "/launch",
     body: "Creator actions are wallet-signed; official updates require Bags creators API verification.",
+  },
+  {
+    title: "Open Trust Passport + run QVAC",
+    href: "/passport/94rNUftdQYXdiYzpkiM6Stdc9bZrxLNasEYeCM8oBAGS",
+    body: "See 6 proof signals (Bags source, pool, creator, fees, claims, social). Click 'Summarize passport' — QVAC explains risk locally using @qvac/sdk LLM inference.",
+  },
+  {
+    title: "See QVAC + system status",
+    href: "/grant/status",
+    body: "Operational dashboard: indexed tokens, fee freshness, QVAC readiness, no-fake-data policy, public API endpoints.",
   },
 ];
 
@@ -91,18 +108,21 @@ export default function HackathonPage() {
           <Link href="/fees" className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl border border-white/[0.055] bg-white/[0.055] px-5 text-sm font-black text-white/80 hover:bg-white/[0.08]">
             Reputation Ranking <Trophy size={15} />
           </Link>
+          <Link href="/passport/94rNUftdQYXdiYzpkiM6Stdc9bZrxLNasEYeCM8oBAGS" className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl border border-[#26a17b]/30 bg-[#26a17b]/15 px-5 text-sm font-black text-[#50d8a4] hover:bg-[#26a17b]/25">
+            Try QVAC Review <BrainCircuit size={15} />
+          </Link>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {tracks.map(({ icon: Icon, title, body, proof }) => (
           <article key={title} className="rounded-[24px] border border-white/[0.055] bg-[#100b22]/82 p-5 shadow-[0_22px_60px_rgba(0,0,0,0.32)]">
             <Icon className="mb-4 text-[#69d99a]" size={24} />
             <h2 className="mb-2 text-xl font-black">{title}</h2>
-            <p className="text-sm font-semibold leading-6 text-white/52">{body}</p>
+            <p className="text-sm font-semibold leading-6 text-white/60">{body}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {proof.map((item) => (
-                <span key={item} className="rounded-lg border border-white/[0.045] bg-white/[0.04] px-2 py-1 text-[10px] font-mono text-white/42">
+                <span key={item} className="rounded-lg border border-white/[0.10] bg-white/[0.06] px-2 py-1 text-[10px] font-mono text-white/60">
                   {item}
                 </span>
               ))}
@@ -122,7 +142,7 @@ export default function HackathonPage() {
               <Link key={step.title} href={step.href} className="grid gap-3 rounded-2xl border border-white/[0.045] bg-white/[0.04] px-3 py-3 transition-colors hover:bg-white/[0.07] md:grid-cols-[42px_0.7fr_1.3fr] md:items-center">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#26aa68]/16 text-xs font-black text-[#69d99a]">{index + 1}</span>
                 <p className="text-sm font-black text-white">{step.title}</p>
-                <p className="text-sm font-semibold leading-6 text-white/50">{step.body}</p>
+                <p className="text-sm font-semibold leading-6 text-white/58">{step.body}</p>
               </Link>
             ))}
           </div>
@@ -142,6 +162,27 @@ export default function HackathonPage() {
         </div>
       </section>
 
+      <section className="mt-8 rounded-[28px] border border-[#26a17b]/20 bg-[#07152c]/88 p-6">
+        <div className="mb-5 flex items-center gap-2">
+          <BrainCircuit className="text-[#50d8a4]" size={20} />
+          <h2 className="font-display text-3xl">Tether + QVAC: private trust AI</h2>
+        </div>
+        <div className="grid gap-4 text-sm font-semibold leading-6 text-white/55 md:grid-cols-3">
+          <div>
+            <p className="mb-1 font-black text-white">Local inference</p>
+            <p>QVAC runs @qvac/sdk with LLAMA_3_2_1B. Token trust analysis stays on your device — no API keys, no cloud.</p>
+          </div>
+          <div>
+            <p className="mb-1 font-black text-white">Evidence-grounded</p>
+            <p>QVAC reads real Bags proof rows (source, pool, creator, fees, claims, social) and cites evidence IDs — never invents data.</p>
+          </div>
+          <div>
+            <p className="mb-1 font-black text-white">USDT creator economics</p>
+            <p>Fee velocity, lifetime fees, and campaign budgets shown in USDT. Trade panel supports SOL and USDT swap via Tether on Solana.</p>
+          </div>
+        </div>
+      </section>
+
       <section className="mt-8 rounded-[28px] border border-white/[0.055] bg-white/[0.045] p-6">
         <div className="mb-5 flex items-center gap-2">
           <Trophy className="text-[#ffb84d]" size={20} />
@@ -151,7 +192,7 @@ export default function HackathonPage() {
           {competitors.map(([name, strength, answer]) => (
             <div key={name} className="grid gap-3 border-b border-white/[0.035] bg-black/18 px-4 py-3 text-sm last:border-b-0 md:grid-cols-[0.7fr_1fr_1.7fr]">
               <p className="font-black text-white">{name}</p>
-              <p className="font-semibold text-white/48">{strength}</p>
+              <p className="font-semibold text-white/58">{strength}</p>
               <p className="font-semibold text-white/62">{answer}</p>
             </div>
           ))}

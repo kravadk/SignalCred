@@ -38,6 +38,15 @@ const sources = [
 
 const particles = ["BAGS", "SOLSCAN", "USDT", "CLAIM", "POOL", "CREATOR", "FEES", "SOCIAL", "8zAe...BAGS", "proof://mint"];
 
+const heroBubbles = [
+  ["7%", "17%", "64px", "0s"],
+  ["21%", "71%", "42px", "-2.4s"],
+  ["43%", "13%", "34px", "-4.2s"],
+  ["75%", "20%", "58px", "-1.2s"],
+  ["88%", "70%", "46px", "-3.5s"],
+  ["61%", "78%", "28px", "-5.4s"],
+] as const;
+
 const proofNodes = [
   ["Bags", "source verified"],
   ["Pool", "Meteora linked"],
@@ -141,7 +150,7 @@ const tracks = [
   ["Bags API", "index, launch source, evidence links", DatabaseZap],
   ["Fee Sharing", "velocity, claims, creator reputation", FileCheck2],
   ["Social Finance", "proof-ranked token timelines", Radio],
-  ["Tether / USDT", "stable creator economics", WalletCards],
+  ["Tether / QVAC", "USDT creator economics, QVAC local AI trust review, private on-device inference", WalletCards],
 ] as const;
 
 type DemoKey = keyof typeof demos;
@@ -163,11 +172,23 @@ export function LandingPage() {
         <a href="/square">Social Proof</a>
         <a href="/hackathon/status">View Hackathon Status</a>
       </div>
-      <section className="relative isolate min-h-[calc(100svh-64px)] overflow-hidden border-b border-white/10 bg-[#080912]">
+      <section className="landing-pacific-hero relative isolate min-h-[calc(100svh-64px)] overflow-hidden border-b border-white/10 bg-[#080912]">
         <HeroTrustScene />
         <div className="absolute inset-0 pointer-events-none landing-aurora" />
         <div className="absolute inset-0 pointer-events-none landing-scan-grid opacity-55" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#07070c] to-transparent" />
+        <div className="pointer-events-none absolute right-5 top-5 z-20 hidden rounded-[20px] border-[4px] border-[#063b89] bg-white px-5 py-3 font-display text-xl text-[#063b89] shadow-[0_9px_0_#063b89] md:block">
+          Score: <span className="text-[#ff941f]">proof</span>
+        </div>
+        <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden">
+          {heroBubbles.map(([left, top, size, delay], index) => (
+            <span
+              key={`${left}-${top}-${index}`}
+              className="landing-signal-bubble"
+              style={{ left, top, width: size, height: size, animationDelay: delay }}
+            />
+          ))}
+        </div>
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {particles.map((item, index) => (
             <span
@@ -227,7 +248,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="relative min-h-[640px] overflow-visible">
+          <div className="landing-pacific-stage relative min-h-[640px] overflow-visible">
             <div className="landing-scanner-shell absolute left-[44%] top-1/2 h-[470px] w-[470px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#31d99b]/20 bg-[#31d99b]/[0.025] shadow-[0_0_140px_rgba(49,217,155,0.16)]">
               <div className="landing-scanner-orbit landing-orbit-a" />
               <div className="landing-scanner-orbit landing-orbit-b" />
@@ -265,6 +286,46 @@ export function LandingPage() {
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="landing-pod-checker absolute left-1/2 top-1/2 z-20 w-[min(92vw,560px)] -translate-x-1/2 -translate-y-1/2 rounded-[34px] border-[5px] border-[#063b89] bg-[#f9fbff] p-5 text-[#07357d] shadow-[0_18px_0_#063b89,0_38px_90px_rgba(0,86,190,0.24)]">
+              <div className="flex flex-col items-center text-center">
+                <div className="landing-logo-buoy -mt-20 flex h-36 w-36 items-center justify-center overflow-hidden rounded-[32px] border-[5px] border-[#063b89] bg-[#0879ff] shadow-[0_16px_0_#063b89,0_24px_68px_rgba(0,119,255,0.34)]">
+                  <img src="/signalcred-logo-256.png" alt="SignalCred" className="h-full w-full object-cover" />
+                </div>
+                <p className="mt-5 font-display text-4xl leading-none text-[#07357d]">Trust checker ready</p>
+                <p className="mt-2 max-w-md text-base font-black leading-6 text-[#35517c]">
+                  Paste a Bags token, get a passport users can verify before trading.
+                </p>
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {[
+                  ["Bags source", "verified", "ok"],
+                  ["Creator proof", "matched", "ok"],
+                  ["Fee loop", "warming", "warn"],
+                  ["Social proof", "token-linked", "ok"],
+                ].map(([label, value, state]) => (
+                  <div
+                    key={label}
+                    className={state === "ok"
+                      ? "rounded-2xl border-[3px] border-[#063b89] bg-[#ddfff2] px-4 py-3 shadow-[0_5px_0_#063b89]"
+                      : "rounded-2xl border-[3px] border-[#063b89] bg-[#fff4d4] px-4 py-3 shadow-[0_5px_0_#063b89]"}
+                  >
+                    <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#54709c]">{label}</p>
+                    <p className={state === "ok" ? "mt-1 text-lg font-black text-[#078a5b]" : "mt-1 text-lg font-black text-[#c07300]"}>
+                      {value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <Link href="/token" className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl border-[3px] border-[#063b89] bg-[#ff9f22] px-5 font-display text-lg text-white shadow-[0_7px_0_#063b89] transition hover:-translate-y-1">
+                  Open Trust Index
+                </Link>
+                <Link href="/passport/8zAeGH7GbT7Pvig3n1tWTgmTi5XqYzeWHVUwfKfiBAGS" className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl border-[3px] border-[#063b89] bg-white px-5 font-display text-lg text-[#063b89] shadow-[0_7px_0_#063b89] transition hover:-translate-y-1">
+                  Sample Passport
+                </Link>
               </div>
             </div>
 

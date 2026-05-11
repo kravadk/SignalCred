@@ -96,7 +96,7 @@ function SignalImage({ signal }: { signal: TrustSignal }) {
           onError={() => setMode(mode === "direct" && proxySrc && proxySrc !== directSrc ? "proxy" : "failed")}
         />
       ) : (
-        signal.symbol.slice(0, 1)
+        (signal.symbol || "?").slice(0, 1)
       )}
     </div>
   );
@@ -151,10 +151,10 @@ export function TrustSignalsLive() {
   const visibleSignals = useMemo(() => groupSignalsByToken(signals).slice(0, 10), [signals]);
 
   return (
-    <section className="relative overflow-hidden rounded-[24px] border border-[#2c7257]/40 bg-[#08131b]/92 shadow-[0_18px_56px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(105,217,154,0.08)]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#00ff88]/42 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#00ff88]/24 via-transparent to-transparent" />
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2c7257]/22 bg-black/12 px-3 py-2">
+    <section className="relative overflow-hidden rounded-[24px] border border-[#37d8ff]/8 bg-[#07152c]/90 shadow-[0_18px_56px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(55,216,255,0.04)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#37d8ff]/22 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#37d8ff]/16 via-transparent to-transparent" />
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#37d8ff]/10 bg-black/12 px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${
             status === "live" ? "border-[#00ff88]/25 bg-[#00ff88]/10 text-[#00ff88]" : "border-[#ffb84d]/25 bg-[#ffb84d]/10 text-[#ffcc7a]"
@@ -185,7 +185,7 @@ export function TrustSignalsLive() {
       </div>
 
       {visibleSignals.length === 0 ? (
-        <div className="px-3 py-3 text-sm font-body text-white/38">
+        <div className="px-3 py-3 text-sm font-body text-white/48">
           {status === "delayed" ? "Trust signals delayed. Check judge status for data-source health." : "Collecting live proof signals..."}
         </div>
       ) : (
@@ -195,7 +195,7 @@ export function TrustSignalsLive() {
             const labels = Array.from(new Map(signal.signals.map((item) => [item.label, item])).values()).slice(0, 3);
             const hiddenCount = Math.max(signal.signals.length - labels.length, 0);
             return (
-              <div key={signal.mint} className="flex min-w-[420px] items-center gap-3 rounded-xl border border-[#314066]/50 bg-[#0a0d19]/82 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-colors hover:border-[#00ff88]/22 hover:bg-white/[0.045]">
+              <div key={signal.mint} className="flex min-w-[420px] items-center gap-3 rounded-xl border border-[#37d8ff]/12 bg-[#07101f]/82 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-colors hover:border-[#37d8ff]/24 hover:bg-white/[0.045]">
                 <SignalImage signal={signal} />
                 <div className="min-w-0 flex-1">
                   <div className="flex min-w-0 items-center gap-1.5">
@@ -206,7 +206,7 @@ export function TrustSignalsLive() {
                     >
                       {signal.name || signal.symbol}
                     </Link>
-                    <span className="shrink-0 text-[11px] font-mono text-white/28">/ {shortMint(signal.mint)}</span>
+                    <span className="shrink-0 text-[11px] font-mono text-white/40">/ {shortMint(signal.mint)}</span>
                   </div>
                   <div className="mt-1.5 flex min-w-0 items-center gap-1.5 overflow-hidden">
                     {labels.map((item) => {
@@ -226,7 +226,7 @@ export function TrustSignalsLive() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <Link href={signal.href} className="rounded-md border border-white/8 px-2 py-1 text-[10px] font-body font-bold text-white/42 hover:text-white">
+                  <Link href={signal.href} className="rounded-md border border-white/12 px-2 py-1 text-[10px] font-body font-bold text-white/55 hover:text-white">
                     Token
                   </Link>
                   <Link href={signal.passportHref} className="rounded-md border border-[#00ff88]/15 bg-[#00ff88]/8 px-2 py-1 text-[10px] font-body font-bold text-[#69d99a]">
@@ -244,7 +244,7 @@ export function TrustSignalsLive() {
         </div>
       )}
 
-      <p className="border-t border-[#2c7257]/18 bg-black/10 px-3 py-1.5 text-[11px] font-body text-white/30">
+      <p className="border-t border-[#37d8ff]/10 bg-black/10 px-3 py-1.5 text-[11px] font-body text-white/42">
         No fake data. Missing proof stays warming or risk until Bags, fee snapshots, Square, or campaign records confirm it.
       </p>
     </section>

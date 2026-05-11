@@ -31,12 +31,12 @@ export function TopNav() {
     <header
       className="sticky top-0 z-50 transition-all duration-200"
       style={{
-        background: scrolled ? "rgba(9, 9, 15, 0.94)" : "rgba(9, 9, 15, 0.82)",
+        background: scrolled ? "rgba(4, 13, 30, 0.95)" : "rgba(4, 13, 30, 0.86)",
         backdropFilter: "blur(14px)",
         borderTop: "none",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        borderBottom: "1px solid rgba(77,205,255,0.12)",
         outline: "none",
-        boxShadow: scrolled ? "0 8px 26px rgba(0,0,0,0.28)" : "none",
+        boxShadow: scrolled ? "0 8px 26px rgba(0,0,0,0.28), 0 1px 0 rgba(55,216,255,0.04)" : "none",
       }}
     >
       <div className="w-full min-h-[52px] flex items-center gap-3 px-3 sm:px-4 xl:px-5">
@@ -66,19 +66,19 @@ export function TopNav() {
                   active ? "text-white" : "text-white/45 hover:text-white"
                 )}
                 style={{
-                  background: active ? "rgba(255,255,255,0.08)" : "transparent",
-                  border: active ? "1px solid rgba(255,255,255,0.10)" : "1px solid transparent",
-                  boxShadow: "none",
+                  background: active ? "linear-gradient(135deg, rgba(8,121,255,0.18), rgba(255,159,34,0.08))" : "transparent",
+                  border: active ? "1px solid rgba(77,205,255,0.18)" : "1px solid transparent",
+                  boxShadow: active ? "0 8px 22px rgba(8,121,255,0.08)" : "none",
                 }}
               >
-                <Icon size={14} strokeWidth={2.2} className={active ? "text-[#b48dff]" : "text-white/40 group-hover:text-white/80"} />
+                <Icon size={14} strokeWidth={2.2} className={active ? "text-[#5ee3ff]" : "text-white/40 group-hover:text-white/80"} />
                 <span className="leading-none">{label}</span>
                 {active && (
                   <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                    style={{ background: "#b48dff", boxShadow: "0 0 6px #7c3aed" }} />
+                    style={{ background: "#37d8ff", boxShadow: "0 0 7px rgba(55,216,255,0.9)" }} />
                 )}
                 {label === "Docs" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#37d8ff] shrink-0" />
                 )}
               </Link>
             );

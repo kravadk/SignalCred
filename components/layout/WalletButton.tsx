@@ -49,7 +49,7 @@ export function WalletButton() {
         <button
           onClick={handleDisconnect}
           disabled={disconnecting}
-          className="h-10 px-4 rounded-2xl bg-white/10 text-white/80 text-sm font-fun font-bold hover:bg-white/20 transition-all"
+          className="h-10 px-4 rounded-2xl border border-cyan-200/10 bg-white/10 text-white/80 text-sm font-fun font-bold hover:border-cyan-200/20 hover:bg-cyan-200/10 transition-all"
         >
           {disconnecting ? "Disconnecting..." : "Disconnect"}
         </button>
@@ -79,8 +79,8 @@ export function WalletButton() {
       disabled={connecting || reconnecting}
       className="h-10 px-5 rounded-2xl font-fun font-black text-sm text-white transition-all hover:opacity-90 active:scale-95"
       style={{
-        background: "linear-gradient(135deg, #8a5de2, #6f46c0)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
+        background: "linear-gradient(135deg, #0879ff 0%, #ff9f22 100%)",
+        boxShadow: "0 10px 24px rgba(8,121,255,0.18), inset 0 1px 0 rgba(255,255,255,0.20)",
       }}
     >
       {connecting || reconnecting ? "Reconnecting..." : "Connect Wallet"}

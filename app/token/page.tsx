@@ -216,6 +216,7 @@ export default function TokenListPage() {
   const [tokens, setTokens] = useState<TokenRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [indexMeta, setIndexMeta] = useState<TokenIndexMeta>({
     total: null,
     hasMore: false,
@@ -247,7 +248,7 @@ export default function TokenListPage() {
         coverage: data.coverage,
       });
     } catch (error) {
-      console.error(error);
+      if (offset === 0) setLoadError(String(error).slice(0, 200));
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -263,8 +264,8 @@ export default function TokenListPage() {
     return tokens.filter((t) => {
       const matchesSearch =
         !q ||
-        t.name.toLowerCase().includes(q) ||
-        t.symbol.toLowerCase().includes(q) ||
+        (t.name || "").toLowerCase().includes(q) ||
+        (t.symbol || "").toLowerCase().includes(q) ||
         t.mint.toLowerCase().includes(q);
       if (!matchesSearch) return false;
       if (activeFilter === "market") return t.priceChange24hPercent != null;
@@ -302,9 +303,9 @@ export default function TokenListPage() {
     <div className="focus-shell">
       <p className="sr-only">Proof Risk Trust Tags Market Fees</p>
 
-      <section className="relative mb-4 overflow-hidden rounded-[28px] border border-[#26324d]/22 bg-[#0d1020]/92 p-4 shadow-[0_18px_56px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.018)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#66ffe1]/8 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#66ffe1]/5 via-transparent to-transparent" />
+      <section className="relative mb-4 overflow-hidden rounded-[28px] border border-[#37d8ff]/8 bg-[#07152c]/90 p-4 shadow-[0_18px_56px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.018)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#37d8ff]/18 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-[#37d8ff]/12 via-transparent to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-[#ff6a84]/8 via-transparent to-transparent" />
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0 max-w-4xl">
@@ -330,7 +331,7 @@ export default function TokenListPage() {
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-2 rounded-2xl border border-[#26324d]/30 bg-black/24 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)] xl:grid-cols-[minmax(360px,1fr)_auto] xl:items-center">
+        <div className="mt-5 grid gap-2 rounded-2xl border border-[#37d8ff]/12 bg-black/24 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)] xl:grid-cols-[minmax(360px,1fr)_auto] xl:items-center">
           <div className="relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/34 pointer-events-none" />
             <input
@@ -353,9 +354,9 @@ export default function TokenListPage() {
                 onClick={() => setActiveFilter(tab as FilterTab)}
                 className="min-h-[34px] rounded-lg px-3 text-xs font-black transition-all"
                 style={{
-                  background: activeFilter === tab ? "rgba(122,85,198,0.26)" : "rgba(255,255,255,0.045)",
-                  border: `1px solid ${activeFilter === tab ? "rgba(180,141,255,0.35)" : "rgba(255,255,255,0.09)"}`,
-                  color: activeFilter === tab ? "#d7c5ff" : "rgba(255,255,255,0.52)",
+                  background: activeFilter === tab ? "linear-gradient(135deg, rgba(8,121,255,0.28), rgba(255,159,34,0.10))" : "rgba(255,255,255,0.045)",
+                  border: `1px solid ${activeFilter === tab ? "rgba(77,205,255,0.34)" : "rgba(255,255,255,0.09)"}`,
+                  color: activeFilter === tab ? "#e6fbff" : "rgba(255,255,255,0.52)",
                 }}
               >
                 {label}
@@ -372,7 +373,7 @@ export default function TokenListPage() {
         </div>
         {importError && <p className="px-3 pb-2 text-xs font-body text-[#ff8a78]">{importError}</p>}
 
-        <div className="mt-4 rounded-2xl border border-[#26324d]/28 bg-[#070913]/72 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)]">
+        <div className="mt-4 rounded-2xl border border-[#37d8ff]/12 bg-[#050d1d]/72 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)]">
           <div className="grid gap-2 text-xs font-body font-black text-white/58 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <span className="rounded-xl border border-[#00ff88]/12 bg-[#26aa68]/8 px-3 py-2 text-[#69d99a]">Bags feed <b className="ml-1 font-mono font-black tabular-nums">{formatCount(indexMeta.coverage?.feedCount ?? 0)}</b></span>
             <span className="rounded-xl border border-white/[0.045] bg-white/[0.035] px-3 py-2">Pools <b className="ml-1 font-mono font-black tabular-nums text-white/75">{formatCount(indexMeta.coverage?.migratedPoolCount ?? 0)}</b></span>
@@ -393,6 +394,14 @@ export default function TokenListPage() {
           {[...Array(5)].map((_, i) => (
             <div key={i} className="skeleton-wave h-16 rounded-xl" />
           ))}
+        </div>
+      ) : loadError ? (
+        <div className="card p-16 text-center">
+          <h3 className="font-display text-3xl text-white mb-2">Index unavailable</h3>
+          <p className="readable-copy mb-6">{loadError}</p>
+          <button onClick={() => loadPage(0)} className="btn-primary h-11 px-8 inline-flex items-center gap-2 text-sm">
+            Retry
+          </button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="card p-16 text-center">
@@ -421,8 +430,8 @@ export default function TokenListPage() {
       ) : (
         <div className="space-y-3">
           <div className="hidden xl:block">
-          <div className="relative overflow-hidden rounded-[28px] border border-[#314066]/28 bg-[#0a0d19]/94 shadow-[0_20px_60px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.025)]">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+          <div className="relative overflow-hidden rounded-[28px] border border-[#37d8ff]/10 bg-[#07101f]/94 shadow-[0_20px_60px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.025)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#37d8ff]/14 to-transparent" />
             <div
               className="grid items-center gap-x-1 border-b border-white/[0.045] bg-white/[0.045] px-2 py-3 text-right text-[9px] font-body font-black uppercase tracking-[0.14em] text-white/68 2xl:gap-x-2 2xl:px-3 2xl:text-[11px]"
               style={{ gridTemplateColumns: DESKTOP_TABLE_COLUMNS }}

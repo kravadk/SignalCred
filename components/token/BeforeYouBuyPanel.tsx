@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { AlertTriangle, ExternalLink } from "lucide-react";
 import { PrivateQvacReview } from "@/components/qvac/PrivateQvacReview";
 import type { TokenPassportResponse } from "@/lib/trust-passport";
 
@@ -82,6 +82,25 @@ export function BeforeYouBuyPanel({ mint }: { mint: string }) {
           {passport ? (riskCount ? `${riskCount} review` : "clear") : "loading"}
         </span>
       </div>
+      {passport && riskCount > 0 && (
+        <div className="mt-2 flex items-start gap-2 rounded-xl border border-[#ff624e]/25 bg-[#ff624e]/8 px-3 py-2.5">
+          <AlertTriangle size={15} className="mt-0.5 shrink-0 text-[#ff8a78]" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-black text-white">
+              {riskCount} risk signal{riskCount > 1 ? "s" : ""} flagged
+            </p>
+            <p className="mt-0.5 text-[11px] font-semibold text-white/52">
+              Run QVAC review below to understand what to inspect before trading.
+            </p>
+          </div>
+          <Link
+            href={`/passport/${mint}`}
+            className="shrink-0 rounded-lg border border-[#ff624e]/30 bg-[#ff624e]/12 px-2 py-1 text-[10px] font-black text-[#ff8a78] hover:bg-[#ff624e]/22"
+          >
+            Full Passport
+          </Link>
+        </div>
+      )}
       {passport && (
         <div className="mt-2">
           <PrivateQvacReview passport={passport} mode="before-buy" compact />

@@ -6,6 +6,8 @@ SignalCred is the **trust and reputation layer for Bags tokens**. It combines a 
 
 Live app: https://signalcred.vercel.app
 
+Demo video: [TODO — add Loom/YouTube link before submission]
+
 ## Why It Exists
 
 Memecoin traders and communities move fast, but most token pages do not answer the questions that matter before someone buys, promotes, or builds around a token:
@@ -168,9 +170,35 @@ QVAC_TRANSLATION_MODEL_SRC=
 QVAC_TRANSLATION_MODEL_TYPE=nmt
 ```
 
-If `QVAC_LLM_MODEL_SRC` is empty, the companion loads the bundled QVAC `LLAMA_3_2_1B_INST_Q4_0` descriptor. `QVAC_MOCK=1` is only for smoke tests and should not be used for the final Tether demo.
+If `QVAC_LLM_MODEL_SRC` is empty, the companion loads the bundled QVAC `LLAMA_3_2_1B_INST_Q4_0` descriptor.
 
-Optional smoke-test mode:
+### Judge quick start — QVAC demo mode
+
+Set `QVAC_MOCK=true` in Vercel environment variables to enable inline demo mode.
+The Next.js API route (`app/api/qvac/[...path]/route.ts`) handles mock responses directly — no companion process needed on the server.
+Mock responses are grounded in real token evidence rows and never invent proof.
+
+To run real local inference:
+
+```bash
+# Terminal 1 — start QVAC companion (loads LLAMA_3_2_1B locally)
+npm run qvac:companion
+
+# Terminal 2 — Next.js dev server
+npm run dev
+
+# Open: http://localhost:3000/passport/94rNUftdQYXdiYzpkiM6Stdc9bZrxLNasEYeCM8oBAGS
+# Click "Summarize passport" to trigger QVAC trust review
+```
+
+Validate QVAC:
+
+```bash
+npm run test:qvac                              # mock mode
+$env:QVAC_REQUIRE_REAL="true"; npm run test:qvac  # real model
+```
+
+Optional smoke-test mode (companion only):
 
 ```bash
 $env:QVAC_MOCK="1"; npm run qvac:companion
