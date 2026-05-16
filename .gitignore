@@ -21,17 +21,8 @@ public/promo/
 .aider*
 .github/workflows/*.yml
 
-# internal planning / scratch docs — kept locally, not part of the public submission
-/TZ_*.md
-/BAGS_COMPETITOR_MEMORY.md
-/BAGS_DOMINATION_PLAN.md
-/FOCUSED_TRACKS_IMPLEMENTATION.md
-/Final_Project_Plan.md
-/HACKATHON_FIX_PLAN.md
-/HACKATHON_SUBMISSION.md
-/crypto_hackathon_checklist.md
-docs/BAGSPULSE_*.md
-docs/SIGNALCRED_*_TZ.md
-docs/SIGNALCRED_GRANT_*.md
-docs/SIGNALCRED_HACKATHON_CHECKLIST.md
+# Hide all markdown from the public repo except README.md — internal plans,
+# scratch docs and operational notes stay on disk but are not pushed to GitHub.
+*.md
+!README.md
 docs/superpowers/
