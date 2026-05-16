@@ -21,8 +21,11 @@ public/promo/
 .aider*
 .github/workflows/*.yml
 
-# Hide all markdown from the public repo except README.md — internal plans,
-# scratch docs and operational notes stay on disk but are not pushed to GitHub.
+# Hide all markdown from the public repo except README.md and the operational
+# runbooks under docs/. Internal plans and scratch docs stay on disk only.
 *.md
 !README.md
+!docs/FEE_SNAPSHOT_CRON.md
+!docs/PRODUCTION_OPERATIONS.md
+!docs/RESTREAM_WORKER_DEPLOY.md
 docs/superpowers/
