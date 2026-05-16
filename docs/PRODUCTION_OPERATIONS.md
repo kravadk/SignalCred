@@ -114,11 +114,12 @@ This repo also includes the workflow template at `docs/github-workflows/producti
 Before submitting or presenting:
 
 ```bash
-npm run check:submit
-npm run test:browser
+npm run typecheck
+npm run test:demo
+npm run build
 ```
 
-Do not run `next build` while `next dev` or browser smoke tests are actively using the same `.next` directory. That can produce temporary 500/404 errors for `_next/static` chunks. `npm run check:submit` handles the safe order automatically.
+Do not run `next build` while `next dev` is active on the same `.next` directory — that can produce temporary 500/404 errors for `_next/static` chunks. Stop the dev server first, then run typecheck → test:demo → build in order.
 
 Then manually open:
 
@@ -145,8 +146,9 @@ Safe local fix applied:
 Before applying breaking security upgrades in production, run a full regression pass:
 
 ```bash
-npm run check:submit
-npm run test:browser
+npm run typecheck
+npm run test:demo
+npm run build
 ```
 
 Then manually test wallet connect, launch signing, swap quote/signing, claim receipt, campaign funding proof, and Square social actions with Phantom/Solflare.

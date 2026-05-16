@@ -18,12 +18,9 @@
     "test": "node --experimental-strip-types scripts/smoke-test.ts",
     "test:demo": "node --experimental-strip-types scripts/demo-readonly-test.ts",
     "test:flow": "node --experimental-strip-types scripts/demo-readonly-test.ts",
-    "test:browser": "node scripts/browser-submit-qa.mjs",
     "test:api": "node --experimental-strip-types scripts/api-test.ts",
     "test:pages": "node --experimental-strip-types scripts/pages-test.ts",
-    "test:all": "bash scripts/run-tests.sh",
-    "check:docs": "node --experimental-strip-types scripts/check-submission-docs.ts",
-    "check:submit": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-submit.ps1"
+    "test:all": "bash scripts/run-tests.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",

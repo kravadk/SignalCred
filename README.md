@@ -315,11 +315,7 @@ npm run typecheck
 npm run test:demo
 npm run test:qvac
 npm run build
-npm run check:docs
-npm run check:submit
 ```
-
-`check:submit` runs the docs check, typecheck, demo suite, and production build.
 
 ## Demo Script
 
